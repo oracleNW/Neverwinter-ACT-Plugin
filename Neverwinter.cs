@@ -15,11 +15,15 @@ using System.Net;
 
 [assembly: AssemblyTitle("Neverwinter Parsing Plugin")]
 [assembly: AssemblyDescription("A basic parser that reads the combat logs in Neverwinter.")]
-[assembly: AssemblyCopyright("dragonsbite and designedbyrng based on: nils.brummond@gmail.com based on: Antday <Unique> based on STO Plugin from Hilbert@mancom, Pirye@ucalegon")]
-[assembly: AssemblyVersion("1.2.5.0")]
-
+[assembly: AssemblyCopyright("dragonsbite, designedbyrng, nils.brummond@gmail.com based on: Antday <Unique> based on STO Plugin from Hilbert@mancom, Pirye@ucalegon")]
+[assembly: AssemblyVersion("1.2.6.0")]
 
 /* Version History - dragonsbite
+ * 1.2.6.0 - 2-11-2018
+ *  - Changed processing order to fix some things. Removed the previous Wheel of Elements : Earth fix as this fix fixes it and as below and other stuff.
+ *  - Fixed Cleanse to show the correct amount of inc Cleanse and out Cleanse
+ *  - Fixed Fall Damage to not start combat
+ *  - Fixed Spike Trap, Poison Spike Trap, and Arrow Trap to not start combat.
  * 1.2.5.0 - 2-9-2018
  *   -Fixed Falling Damage to not start combat. 
  *   -Fixed Wheel of Elements : Earth to not start combat.
@@ -87,7 +91,7 @@ using System.Net;
  *   - cleanup some things from orig STO Parser
  * 0.0.1.0 - 2013/04/05
  *   - initial alpha version
-*/
+ */
 
 
 namespace NWParsing_Plugin
@@ -2494,11 +2498,11 @@ namespace NWParsing_Plugin
                 {
                     // Normal Power case...
                     ProcessNamesOST(l);
-
-                    AddCombatActionNW(
-                        (int)SwingTypeEnum.PowerHealing, l.critical, l.flank, l.special,
-                        l.unitAttackerName, l.attackType, new Dnum(-magAdj), -l.mag, -l.magBase,
-                        l.logInfo.detectedTime, l.ts, l.unitTargetName, l.type);
+					//  Trying to not end combat via power
+					AddCombatActionNW(
+					(int)SwingTypeEnum.PowerHealing, l.critical, false, l.special,
+					l.unitAttackerName, l.attackType, new Dnum(-magAdj), -l.mag, -l.magBase,
+					l.logInfo.detectedTime, l.ts, l.unitTargetName, l.type);
                 }
             }
         }
@@ -2603,29 +2607,51 @@ namespace NWParsing_Plugin
                     msShielded.Tags.Add("ShieldP", shielded);
                 }
             }
-
             if (l.evtInt == "Autodesc.Combatevent.Falling")
             {
-                // Falling damage does not start combat...
+                // Falling damage to not start combat...
+                if (ActGlobals.oFormActMain.InCombat)
+                {
+                    ProcessNamesOST(l);
+                    AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
+                }
+            } 
+			else if (l.evtInt == "Pn.Mlg6n01")
+            {
+                // Poison Spike Trap to not start combat...
+                if (ActGlobals.oFormActMain.InCombat)
+                {
+                    ProcessNamesOST(l);
+                    AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
+                }
+            } 
+			else if (l.evtInt == "Pn.Sv2m0c1")
+            {
+                // Spike Trap to not start combat...
                 if (ActGlobals.oFormActMain.InCombat)
                 {
                     ProcessNamesOST(l);
                     AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
                 }
             }
-            else if ((l.evtInt == "Pn.J1g5ci") && (l.flags == "ShowPowerDisplayName"))
+            else if (l.evtInt == "Pn.Rjmxw51")
             {
-                // Wheel of Elements : Earth does not start combat...             
-            }
-			else if (l.evtInt == "Pn.O4hc6g1")
-            {
-                // wheel of elements should not start combat
+                // Arrow Trap to not start combat...
                 if (ActGlobals.oFormActMain.InCombat)
                 {
                     ProcessNamesOST(l);
                     AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
                 }
             }
+ 			else if (l.evtInt == "Pn.O4hc6g1")
+            {
+                // Fall damage to not start combat
+                if (ActGlobals.oFormActMain.InCombat)
+                {
+                    ProcessNamesOST(l);
+                    AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
+                }
+			}
 			else if (l.evtInt == "Pn.Wypyjw1") // Knight's Valor,
             {
                 // "13:07:18:10:30:48.3::Largoevo,P[201228983@6531604 Largoevo@largoevo],Ugan the Abominable,C[1469 Mindflayer_Miniboss_Ugan],Largoevo,P[201228983@6531604 Largoevo@largoevo],Knight's Valor,Pn.Wypyjw1,Physical,,449.42,1195.48
@@ -2728,34 +2754,30 @@ namespace NWParsing_Plugin
         {
             l.logInfo.detectedType = Color.Gray.ToArgb();
 
-            if (l.type == "HitPoints")
+            if (l.type == "AttribModExpire") // Cleanse
+            {
+                ProcessActionCleanse(l);
+            }
+			else if (l.showPowerDisplayName)
+            {
+                // Non-damaging effects.
+                ProcessActionSPDN(l);
+            }
+            else if (l.type == "Power")
+            {
+                ProcessActionPower(l);
+            }
+			else if (l.type == "HitPoints")
             {
                 ProcessActionHeals(l);
             }
-			else if (l.evtInt == "Pn.O4hc6g1")
-			{
-				ProcessActionDamage(l);
-			}
-			else if (l.evtInt == "Pn.J1g5ci")
+ 			else if (l.evtInt == "Pn.O4hc6g1")
 			{
 				ProcessActionDamage(l);
 			}
 			else if (l.type == "Shield")
             {
                 ProcessActionShields(l);
-            }
-            else if (l.type == "AttribModExpire") // Cleanse
-            {
-                ProcessActionCleanse(l);
-            }
-            else if (l.type == "Power")
-            {
-                ProcessActionPower(l);
-            }
-            else if (l.showPowerDisplayName)
-            {
-                // Non-damaging effects.
-                ProcessActionSPDN(l);
             }
             else
             {
