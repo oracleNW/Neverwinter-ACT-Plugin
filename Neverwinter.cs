@@ -15,11 +15,15 @@ using System.Net;
 
 [assembly: AssemblyTitle("Neverwinter Parsing Plugin")]
 [assembly: AssemblyDescription("A basic parser that reads the combat logs in Neverwinter.")]
-[assembly: AssemblyCopyright("nils.brummond@gmail.com based on: Antday <Unique> based on STO Plugin from Hilbert@mancom, Pirye@ucalegon")]
-[assembly: AssemblyVersion("1.2.2.0")]
+[assembly: AssemblyCopyright("catch22atplay based on nils.brummond@gmail.com based on: Antday <Unique> based on STO Plugin from Hilbert@mancom, Pirye@ucalegon")]
+[assembly: AssemblyVersion("1.2.3.0")]
 
 
 /* Version History - npb
+ *1.2.3.0 - 2017/02/01
+ *  - Changed ShowPowerDisplayName Which does not do damage to not show up under damage and instead moved it to Power. 
+ *  - Yes i know it's not a great fix. It's supposed to only display on your screen when in game options, Hud, "Show Player Triggered Power Names" is checked.
+ *  - Doesn't really serve a purpose here or in the combat log except to know that you triggered it. Which actually is kinda helpful to know. But we'd need a new category for this. Until then look under Power. 
  * 1.2.2.0 - 2014/01/10
  *  - Minor code cleanup
  *  - Filtered out all injuries from showing in outgoing damage.
@@ -2691,7 +2695,7 @@ namespace NWParsing_Plugin
             else if (l.showPowerDisplayName)
             {
                 // Non-damaging effects.
-                ProcessActionSPDN(l);
+                ProcessActionPower(l);
             }
             else
             {
