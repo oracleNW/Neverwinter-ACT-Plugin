@@ -5,7 +5,7 @@ An plugin for ACT (Advanced Combat Tracker) to parse combat log file from Neverw
 
 - ACT is found at http://advancedcombattracker.com/
 - D&D Neverwinter is found at http://nw.perfectworld.com/
-- The released version of this plugin can be downloaded from [HERE](https://s3.amazonaws.com/nw-act-plugin/Neverwinter.cs)
+- The released version of this plugin can be downloaded from [HERE][nwcs]
 
 This plugin is based on the version 0.0.5.1 plugin by Antday \<Unique\>, 
 which is based on the STO plugin from Hilbert @ mancom, Pirye @ ucalegon.
@@ -14,13 +14,13 @@ which is based on the STO plugin from Hilbert @ mancom, Pirye @ ucalegon.
 Install
 =======
 - If you don't have ACT installed then get it from [HERE] (http://advancedcombattracker.com/download.php) and install it.
-- Download the Neverwinter.cs file to your computer from [HERE](https://s3.amazonaws.com/nw-act-plugin/Neverwinter.cs).
-- In the Neverwinter game use the command "/Combatlog 1" to begin logging to a file.  
+- Download the Neverwinter.cs file to your computer from [HERE][nwcs].
+- In the Neverwinter game use the command ``/Combatlog 1`` to begin logging to a file.
 - From ACT goto the plugins tab and "browse..." to and then enable the Neverwinter.cs plugin.  
-- Goto the option tab now.   Select the Miscellaneous category and use the "Open log" button.  Select the file "C:\Users\Public\Games\Cryptic Studios\Neverwinter\Live\Logs\GameClient\Combatlog.Log".
+- Go to the option tab now. Select the Miscellaneous category and use the "Open log" button. Select the file ``C:\Users\Public\Games\Cryptic Studios\Neverwinter\Live\Logs\GameClient\Combatlog.Log``.
 
 Note: For the Neverwinter Preview server the combat log file is:
-  "C:\Users\Public\Games\Cryptic Studios\Neverwinter\Playtest\logs\GameClient\Combatlog.Log"
+  ``C:\Users\Public\Games\Cryptic Studios\Neverwinter\Playtest\logs\GameClient\Combatlog.Log``
 
 
 State
@@ -40,7 +40,7 @@ Known Issues
 ============
 - Devoted Cleric power "Flame Strike" causes falling damage that can not be tracked.  Falling damage does not specify who/what caused the fall.
 - There is currently no way to detect zone changes from the Combatlog.Log file.
-- injuries are counted as outgoing damage.  (Feature?)
+- Injuries are counted as outgoing damage.  (Feature?)
 - Cleric Disciple companions Sacred Flame temp HP effect is credited to the owner of the companion.
 
 
@@ -72,3 +72,4 @@ Disclaimer
 =========================
 This repository is a git backup from other people's work being shared at [ADVANCED COMBAT TRACKER PLUGIN FOR NEVERWINTER](https://www.arcgames.com/en/forums/neverwinter#/discussion/1238063/advanced-combat-tracker-plugin-for-neverwinter-updates-feb-2018)
 
+[nwcs]: https://bitbucket.org/nisckis/neverwinter-act-plugin/raw/master/Neverwinter.cs
