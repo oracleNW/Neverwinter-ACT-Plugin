@@ -16,10 +16,13 @@ using System.Net;
 [assembly: AssemblyTitle("Neverwinter Parsing Plugin")]
 [assembly: AssemblyDescription("A basic parser that reads the combat logs in Neverwinter.")]
 [assembly: AssemblyCopyright("dragonsbite and designedbyrng based on: nils.brummond@gmail.com based on: Antday <Unique> based on STO Plugin from Hilbert@mancom, Pirye@ucalegon")]
-[assembly: AssemblyVersion("1.2.4.0")]
+[assembly: AssemblyVersion("1.2.5.0")]
 
 
 /* Version History - dragonsbite
+ * 1.2.5.0 - 2-9-2018
+ *   -Fixed Falling Damage to not start combat. 
+ *   -Fixed Wheel of Elements : Earth to not start combat.
  * 1.2.4.0 - 2-9-2018
  *  - Fixed Pet Damage "In and "Out" and "Deaths". This affects your damage in and out by less then 0.05% and your deaths.
  *  - Fixed Cure/Dispel In and Out to only show "Cleanse" and ignored others that did NOT show a cleanse and instead just showed messages of expiration.
@@ -2610,7 +2613,20 @@ namespace NWParsing_Plugin
                     AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
                 }
             }
-            else if (l.evtInt == "Pn.Wypyjw1") // Knight's Valor,
+            else if ((l.evtInt == "Pn.J1g5ci") && (l.flags == "ShowPowerDisplayName"))
+            {
+                // Wheel of Elements : Earth does not start combat...             
+            }
+			else if (l.evtInt == "Pn.O4hc6g1")
+            {
+                // wheel of elements should not start combat
+                if (ActGlobals.oFormActMain.InCombat)
+                {
+                    ProcessNamesOST(l);
+                    AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
+                }
+            }
+			else if (l.evtInt == "Pn.Wypyjw1") // Knight's Valor,
             {
                 // "13:07:18:10:30:48.3::Largoevo,P[201228983@6531604 Largoevo@largoevo],Ugan the Abominable,C[1469 Mindflayer_Miniboss_Ugan],Largoevo,P[201228983@6531604 Largoevo@largoevo],Knight's Valor,Pn.Wypyjw1,Physical,,449.42,1195.48
                 // Attack goes SRC -> TRG and ignore the owner.  The SRC is not the owner's pet.
@@ -2716,7 +2732,15 @@ namespace NWParsing_Plugin
             {
                 ProcessActionHeals(l);
             }
-            else if (l.type == "Shield")
+			else if (l.evtInt == "Pn.O4hc6g1")
+			{
+				ProcessActionDamage(l);
+			}
+			else if (l.evtInt == "Pn.J1g5ci")
+			{
+				ProcessActionDamage(l);
+			}
+			else if (l.type == "Shield")
             {
                 ProcessActionShields(l);
             }
