@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Drawing;
@@ -15,15 +15,26 @@ using System.Net;
 
 [assembly: AssemblyTitle("Neverwinter Parsing Plugin")]
 [assembly: AssemblyDescription("A basic parser that reads the combat logs in Neverwinter.")]
-[assembly: AssemblyCopyright("catch22atplay based on nils.brummond@gmail.com based on: Antday <Unique> based on STO Plugin from Hilbert@mancom, Pirye@ucalegon")]
-[assembly: AssemblyVersion("1.2.3.0")]
+[assembly: AssemblyCopyright("dragonsbite and designedbyrng based on: nils.brummond@gmail.com based on: Antday <Unique> based on STO Plugin from Hilbert@mancom, Pirye@ucalegon")]
+[assembly: AssemblyVersion("1.2.4.0")]
 
 
+/* Version History - dragonsbite
+ * 1.2.4.0 - 2-9-2018
+ *  - Fixed Pet Damage "In and "Out" and "Deaths". This affects your damage in and out by less then 0.05% and your deaths.
+ *  - Fixed Cure/Dispel In and Out to only show "Cleanse" and ignored others that did NOT show a cleanse and instead just showed messages of expiration.
+ *  - Fixed "Start" and "Stop" of combat to now start and stop via actual damage as it properly should. Encounter times are decreased as a result. 
+ *  - Consequently dps increases as it should. The amount of encounters increases as there is more time between encounters now. 
+ */
+ 
+/* Version History - designedbyrng
+ * 1.2.3.0 - 2-8-2018
+ *  - Non-damaging procs are in their own category "Non-Damage (Out)" and "Non-Damage (Inc)"
+ *  - Fixed Slayer marks now are parsed properly
+ *  - Several stats have been renamed to fit neverwinter better 
+ */	
+ 
 /* Version History - npb
- *1.2.3.0 - 2017/02/01
- *  - Changed ShowPowerDisplayName Which does not do damage to not show up under damage and instead moved it to Power. 
- *  - Yes i know it's not a great fix. It's supposed to only display on your screen when in game options, Hud, "Show Player Triggered Power Names" is checked.
- *  - Doesn't really serve a purpose here or in the combat log except to know that you triggered it. Which actually is kinda helpful to know. But we'd need a new category for this. Until then look under Power. 
  * 1.2.2.0 - 2014/01/10
  *  - Minor code cleanup
  *  - Filtered out all injuries from showing in outgoing damage.
@@ -316,7 +327,18 @@ namespace NWParsing_Plugin
         private Dictionary<string, bool> playerCharacterNames = new Dictionary<string, bool>();
         private bool playersCharacterFound = false;
 
-        private static readonly Dictionary<string, bool> injuryTypes = new Dictionary<string, bool>()
+		private const string IncDamageName = "Damage (Inc)";
+		private const string OutDamageName = "Damage (Out)";
+		private const string IncHealedName = "Heals (Inc)";
+		private const string OutHealedName = "Heals (Out)";
+		private const string IncPowerRName = "AP Gain (Inc)";
+		private const string OutPowerRName = "AP Gain (Out)";
+		private const string IncSkillsName = "Non-Damage (Inc)";
+		private const string OutSkillsName = "Non-Damage (Out)";
+		private const string IncCleanseName = "Cleanse (Inc)";
+		private const string OutCleanseName = "Cleanse (Out)";
+
+		private static readonly Dictionary<string, bool> injuryTypes = new Dictionary<string, bool>()
         {
             // Minor Body Injury
             // 13:10:13:14:39:55.0::,,,,Lady Shiva,P[401878470@8454371 Lady Shiva@pombetitha],Minor Body Injury,Pn.Snckuc1,HitPointsMax,ShowPowerDisplayName,0.3,0
@@ -885,47 +907,47 @@ namespace NWParsing_Plugin
 
         private string GetCellDataFlankDamPrec(CombatantData Data)
         {
-            return GetCellDataFlankPrec(Data.Items["Outgoing Damage"]);
+            return GetCellDataFlankPrec(Data.Items[OutDamageName]);
         }
 
         private string GetSqlDataFlankDamPrec(CombatantData Data)
         {
-            return GetSqlDataFlankPrec(Data.Items["Outgoing Damage"]);
+            return GetSqlDataFlankPrec(Data.Items[OutDamageName]);
         }
 
         private int CDCompareFlankDamPrec(CombatantData Left, CombatantData Right)
         {
-            return GetDTFlankPrecValue(Left.Items["Outgoing Damage"]).CompareTo(GetDTFlankPrecValue(Right.Items["Outgoing Damage"]));
+            return GetDTFlankPrecValue(Left.Items[OutDamageName]).CompareTo(GetDTFlankPrecValue(Right.Items[OutDamageName]));
         }
 
         private string GetCellDataDmgEffectPrec(CombatantData Data)
         {
-            return GetCellDataEffectiveness(Data.Items["Outgoing Damage"]);
+            return GetCellDataEffectiveness(Data.Items[OutDamageName]);
         }
 
         private string GetSqlDataDmgEffectPrec(CombatantData Data)
         {
-            return GetSqlDataEffectiveness(Data.Items["Outgoing Damage"]);
+            return GetSqlDataEffectiveness(Data.Items[OutDamageName]);
         }
 
         private int CDCompareDmgEffectPrec(CombatantData Left, CombatantData Right)
         {
-            return GetDTEffectivenessValue(Left.Items["Outgoing Damage"]).CompareTo(GetDTEffectivenessValue(Right.Items["Outgoing Damage"]));
+            return GetDTEffectivenessValue(Left.Items[OutDamageName]).CompareTo(GetDTEffectivenessValue(Right.Items[OutDamageName]));
         }
 
         private string GetCellDataDmgTakenEffectPrec(CombatantData Data)
         {
-            return GetCellDataEffectiveness(Data.Items["Incoming Damage"]);
+            return GetCellDataEffectiveness(Data.Items[IncDamageName]);
         }
 
         private string GetSqlDataDmgTakenEffectPrec(CombatantData Data)
         {
-            return GetSqlDataEffectiveness(Data.Items["Incoming Damage"]);
+            return GetSqlDataEffectiveness(Data.Items[IncDamageName]);
         }
 
         private int CDCompareDmgTakenEffectPrec(CombatantData Left, CombatantData Right)
         {
-            return GetDTEffectivenessValue(Left.Items["Incoming Damage"]).CompareTo(GetDTEffectivenessValue(Right.Items["Incoming Damage"]));
+            return GetDTEffectivenessValue(Left.Items[IncDamageName]).CompareTo(GetDTEffectivenessValue(Right.Items[IncDamageName]));
         }
 
 
@@ -1038,50 +1060,51 @@ namespace NWParsing_Plugin
             CombatantData.OutgoingDamageTypeDataObjects = new Dictionary<string, CombatantData.DamageTypeDef>
 		{
 			//{"Auto-Attack (Out)", new CombatantData.DamageTypeDef("Auto-Attack (Out)", -1, Color.DarkGoldenrod)},
-			//{"Skill/Ability (Out)", new CombatantData.DamageTypeDef("Skill/Ability (Out)", -1, Color.DarkOrange)},
-			{"Outgoing Damage", new CombatantData.DamageTypeDef("Outgoing Damage", 0, Color.Orange)},
-			{"Healed (Out)", new CombatantData.DamageTypeDef("Healed (Out)", 1, Color.Blue)},
+			{OutDamageName, new CombatantData.DamageTypeDef("Damage", 0, Color.Orange)},
+			{OutHealedName, new CombatantData.DamageTypeDef(OutHealedName, 1, Color.Blue)},
 			//{"Power Drain (Out)", new CombatantData.DamageTypeDef("Power Drain (Out)", -1, Color.Purple)},
-			{"Power Replenish (Out)", new CombatantData.DamageTypeDef("Power Replenish (Out)", 1, Color.Violet)},
-			{"Cure/Dispel (Out)", new CombatantData.DamageTypeDef("Cure/Dispel (Out)", 0, Color.Wheat)},
+			{OutPowerRName, new CombatantData.DamageTypeDef(OutPowerRName, 1, Color.Violet)},
+			{OutCleanseName, new CombatantData.DamageTypeDef(OutCleanseName, 0, Color.Wheat)},
 			//{"Threat (Out)", new CombatantData.DamageTypeDef("Threat (Out)", -1, Color.Yellow)},
+			{OutSkillsName, new CombatantData.DamageTypeDef(OutSkillsName, -1, Color.DarkOrange)},
 			{"All Outgoing (Ref)", new CombatantData.DamageTypeDef("All Outgoing (Ref)", 0, Color.Black)}
 		};
             CombatantData.IncomingDamageTypeDataObjects = new Dictionary<string, CombatantData.DamageTypeDef>
 		{
-			{"Incoming Damage", new CombatantData.DamageTypeDef("Incoming Damage", -1, Color.Red)},
-			{"Healed (Inc)",new CombatantData.DamageTypeDef("Healed (Inc)", 1, Color.LimeGreen)},
+			{IncDamageName, new CombatantData.DamageTypeDef(IncDamageName, -1, Color.Red)},
+			{IncHealedName,new CombatantData.DamageTypeDef(IncHealedName, 1, Color.LimeGreen)},
 			//{"Power Drain (Inc)",new CombatantData.DamageTypeDef("Power Drain (Inc)", -1, Color.Magenta)},
-			{"Power Replenish (Inc)",new CombatantData.DamageTypeDef("Power Replenish (Inc)", 1, Color.MediumPurple)},
-			{"Cure/Dispel (Inc)", new CombatantData.DamageTypeDef("Cure/Dispel (Inc)", 0, Color.Wheat)},
+			{IncPowerRName,new CombatantData.DamageTypeDef(IncPowerRName, 1, Color.MediumPurple)},
+			{IncCleanseName, new CombatantData.DamageTypeDef(IncCleanseName, 0, Color.Wheat)},
 			//{"Threat (Inc)",new CombatantData.DamageTypeDef("Threat (Inc)", -1, Color.Yellow)},
+			{IncSkillsName, new CombatantData.DamageTypeDef(IncSkillsName, -1, Color.Yellow)},
 			{"All Incoming (Ref)",new CombatantData.DamageTypeDef("All Incoming (Ref)", 0, Color.Black)}
 		};
             CombatantData.SwingTypeToDamageTypeDataLinksOutgoing = new SortedDictionary<int, List<string>>
 		{ 
-			{1, new List<string> { "Outgoing Damage" } },
-			{2, new List<string> { "Outgoing Damage" } },
-			{3, new List<string> { "Healed (Out)" } },
-			{13, new List<string> { "Power Replenish (Out)" } },
-			{20, new List<string> { "Cure/Dispel (Out)" } }
+			{1, new List<string> { OutDamageName } },
+			{2, new List<string> { OutSkillsName } },
+			{3, new List<string> { OutHealedName } },
+			{13, new List<string> { OutPowerRName } },
+			{20, new List<string> { OutCleanseName } }
 		};
             CombatantData.SwingTypeToDamageTypeDataLinksIncoming = new SortedDictionary<int, List<string>>
 		{ 
-			{1, new List<string> { "Incoming Damage" } },
-			{2, new List<string> { "Incoming Damage" } },
-			{3, new List<string> { "Healed (Inc)" } },
-			{13, new List<string> { "Power Replenish (Inc)" } },
-			{20, new List<string> { "Cure/Dispel (Inc)" } }
+			{1, new List<string> { IncDamageName } },
+			{2, new List<string> { IncSkillsName } },
+			{3, new List<string> { IncHealedName } },
+			{13, new List<string> { IncPowerRName } },
+			{20, new List<string> { IncCleanseName } }
 		};
 
             CombatantData.DamageSwingTypes = new List<int> { 1, 2 };
             CombatantData.HealingSwingTypes = new List<int> { 3 };
 
             CombatantData.DamageTypeDataNonSkillDamage = "Auto-Attack (Out)";
-            CombatantData.DamageTypeDataOutgoingDamage = "Outgoing Damage";
-            CombatantData.DamageTypeDataOutgoingHealing = "Healed (Out)";
-            CombatantData.DamageTypeDataIncomingDamage = "Incoming Damage";
-            CombatantData.DamageTypeDataIncomingHealing = "Healed (Inc)";
+            CombatantData.DamageTypeDataOutgoingDamage = OutDamageName;
+            CombatantData.DamageTypeDataOutgoingHealing = OutHealedName;
+            CombatantData.DamageTypeDataIncomingDamage = IncDamageName;
+            CombatantData.DamageTypeDataIncomingHealing = IncHealedName;
 
 
             CombatantData.ExportVariables.Clear();
@@ -1681,9 +1704,9 @@ namespace NWParsing_Plugin
             List<AttackType> allAttackTypes = new List<AttackType>();
             List<AttackType> filteredAttackTypes = new List<AttackType>();
 
-            foreach (KeyValuePair<string, AttackType> item in Data.Items["Outgoing Damage"].Items)
+            foreach (KeyValuePair<string, AttackType> item in Data.Items[OutDamageName].Items)
                 allAttackTypes.Add(item.Value);
-            foreach (KeyValuePair<string, AttackType> item in Data.Items["Healed (Out)"].Items)
+            foreach (KeyValuePair<string, AttackType> item in Data.Items[OutHealedName].Items)
                 allAttackTypes.Add(item.Value);
 
             foreach (AttackType item in allAttackTypes)
@@ -2381,12 +2404,19 @@ namespace NWParsing_Plugin
 
             if (ActGlobals.oFormActMain.InCombat)
             {
-                ProcessNamesOST(l);
+                if (l.evtDsp == "Cleanse")
+				{
+					ProcessNamesOST(l);
 
-                AddCombatActionNW(
-                    (int)SwingTypeEnum.CureDispel, l.critical, l.flank, l.special, 
-                    l.unitAttackerName, l.attackType, Dnum.NoDamage, l.mag, l.magBase, 
-                    l.logInfo.detectedTime, l.ts, l.unitTargetName, l.type );
+					AddCombatActionNW(
+						(int)SwingTypeEnum.CureDispel, l.critical, l.flank, l.special, 
+						l.unitAttackerName, l.attackType, Dnum.NoDamage, l.mag, l.magBase, 
+						l.logInfo.detectedTime, l.ts, l.unitTargetName, l.type );
+				}
+                else
+                {
+				// ignore the rest as they're only expire messages
+                }               
             }
         }
 
@@ -2473,7 +2503,9 @@ namespace NWParsing_Plugin
         private void ProcessActionSPDN(ParsedLine l)
         {
             // Handle all the buff and proc buffs/debuffs
-            // type: PowerRecharge, Null, Alacrity, CombatAdvantage, Lightning(Storm Spell), CritSeverity, ...
+            int magAdj = (int)Math.Round(l.mag);
+            int magBaseAdj = (int)Math.Round(l.magBase);
+			// type: PowerRecharge, Null, Alacrity, CombatAdvantage, Lightning(Storm Spell), CritSeverity, ...
 
             l.logInfo.detectedType = Color.DarkTurquoise.ToArgb();
 
@@ -2520,8 +2552,12 @@ namespace NWParsing_Plugin
                 if (ActGlobals.oFormActMain.InCombat)
                 {
                     ProcessNamesOST(l);
-                    AddCombatActionHostile(l, (int)SwingTypeEnum.NonMelee, l.critical, l.special, l.attackType, Dnum.NoDamage, 0, l.type);
-                }
+                 //   AddCombatActionHostile(l, (int)SwingTypeEnum.NonMelee, l.critical, l.special, l.attackType, Dnum.NoDamage, 0, l.type);
+					AddCombatActionNW(
+					(int)SwingTypeEnum.NonMelee, l.critical, l.flank, l.special,
+					l.unitAttackerName, l.attackType, new Dnum(-magAdj), -l.mag, -l.magBase,
+					l.logInfo.detectedTime, l.ts, l.unitTargetName, l.type);
+				}
             }
         }
 
@@ -2571,7 +2607,7 @@ namespace NWParsing_Plugin
                 if (ActGlobals.oFormActMain.InCombat)
                 {
                     ProcessNamesOST(l);
-                    AddCombatActionHostile(l, l.swingType, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
+                    AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
                 }
             }
             else if (l.evtInt == "Pn.Wypyjw1") // Knight's Valor,
@@ -2580,7 +2616,7 @@ namespace NWParsing_Plugin
                 // Attack goes SRC -> TRG and ignore the owner.  The SRC is not the owner's pet.
 
                 ProcessNamesST(l);
-                AddCombatActionHostile(l, l.swingType, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
+                AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
             }
             else
             {
@@ -2619,20 +2655,20 @@ namespace NWParsing_Plugin
                     }
                 }
 
-                //
-                // Note:  There seems to be many cases where dmgBase == 0 while damage is applied.
-                //
+				//
+				// Note:  There seems to be many cases where dmgBase == 0 while damage is applied.
+				//
 
-                /*
+				/*
                 if (l.flags.Contains("Miss"))
                 {
                     // TODO:  Not sure I have ever seen a "miss" in a log.  This actually valid?
-                    AddCombatActionHostile(l, l.swingType, l.critical, l.special, l.attackType, Dnum.Miss, l.type, magBaseAdj);
+                    AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, l.special, l.attackType, Dnum.Miss, l.type, magBaseAdj);
                 }
                 else 
                 */
 
-                if (l.immune)
+				if (l.immune)
                 {
                     if ((magAdj == 0) && (magBaseAdj == 0))
                     {
@@ -2645,7 +2681,7 @@ namespace NWParsing_Plugin
                     {
                         // Generally damaging attacks have mag=0 and magBase > 0 when Immune.
                         l.logInfo.detectedType = Color.Maroon.ToArgb();
-                        AddCombatActionHostile(l, l.swingType, l.critical, special, l.attackType, Dnum.NoDamage, l.mag, l.type, l.magBase);
+                        AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, Dnum.NoDamage, l.mag, l.type, l.magBase);
                     }
                 }
                 else if (l.dodge)
@@ -2654,7 +2690,7 @@ namespace NWParsing_Plugin
                     // I have seen damaging attacks that are both Dodge and Kill in the flags.
                     // So the target dodged but still died.
                     l.logInfo.detectedType = Color.Maroon.ToArgb();
-                    AddCombatActionHostile(l, l.swingType, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
+                    AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
                 }
                 else
                 {
@@ -2666,7 +2702,7 @@ namespace NWParsing_Plugin
                     else
                     {
                         // NOT All attacks have a magBase (anymore).
-                        AddCombatActionHostile(l, l.swingType, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
+                        AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
                     }
                 }
             }
@@ -2695,7 +2731,7 @@ namespace NWParsing_Plugin
             else if (l.showPowerDisplayName)
             {
                 // Non-damaging effects.
-                ProcessActionPower(l);
+                ProcessActionSPDN(l);
             }
             else
             {
@@ -2716,15 +2752,15 @@ namespace NWParsing_Plugin
                 ActGlobals.oFormSpellTimers.RemoveTimerMods(l.tgtDsp);
                 ActGlobals.oFormSpellTimers.DispellTimerMods(l.tgtDsp);
 
-                // No "Killing : Flank" ever.  Doesn't make sense since there is no damage in the kill tracking.
-                // And it messes up the kill counts.
-                // AddCombatActionHostile(l, l.swingType, l.critical, l.special, "Killing", Dnum.Death, l.type);
+				// No "Killing : Flank" ever.  Doesn't make sense since there is no damage in the kill tracking.
+				// And it messes up the kill counts.
+				// AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, l.special, "Killing", Dnum.Death, l.type);
 
-                // Use encounter names attacker and target here.  This allows filtering
-                if (ActGlobals.oFormActMain.SetEncounter(l.logInfo.detectedTime, l.encAttackerName, l.encTargetName))
+				// Use encounter names attacker and target here.  This allows filtering
+				if (ActGlobals.oFormActMain.SetEncounter(l.logInfo.detectedTime, l.encAttackerName, l.encTargetName))
                 {
                     MasterSwing ms = 
-                        new MasterSwing(l.swingType, l.critical, l.special, Dnum.Death, l.logInfo.detectedTime, l.ts, 
+                        new MasterSwing((int)SwingTypeEnum.Melee, l.critical, l.special, Dnum.Death, l.logInfo.detectedTime, l.ts, 
                             "Killing", l.unitAttackerName, "Death", l.unitTargetName);
                     ms.Tags.Add("Flank", l.flank);
                     ActGlobals.oFormActMain.AddCombatAction(ms);
@@ -3255,7 +3291,8 @@ namespace NWParsing_Plugin
 
             this.logInfo = logInfo;
             this.ts = ++ActGlobals.oFormActMain.GlobalTimeSorter;
-            string[] split = logInfo.logLine.Split(NW_Parser.separatorLog, StringSplitOptions.None);
+			string overloadfix = logInfo.logLine.Replace("Slayer, Rank", "Slayer Rank");
+			string[] split = overloadfix.Split(NW_Parser.separatorLog, StringSplitOptions.None);
             ownDsp = split[1];
             ownInt = split[2];
             srcDsp = split[3];
@@ -3333,4 +3370,4 @@ namespace NWParsing_Plugin
             }
         }
     }
-}
+} 
