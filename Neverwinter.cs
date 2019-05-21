@@ -537,6 +537,51 @@ namespace NWParsing_Plugin
             return leftFlank.CompareTo(rightFlank);
         }
 
+        private string GetCellDataDeflect(MasterSwing Data)
+        {
+            object val;
+            bool Deflect = false;
+
+            if (Data.Tags.TryGetValue("Deflect", out val))
+            {
+                Deflect = (bool)val;
+            }
+
+            return Deflect.ToString();
+        }
+
+        private string GetSqlDataDeflect(MasterSwing Data)
+        {
+            object val;
+            bool Deflect = false;
+
+            if (Data.Tags.TryGetValue("Deflect", out val))
+            {
+                Deflect = (bool)val;
+            }
+
+            return Deflect.ToString(usCulture)[0].ToString();
+        }
+
+        private int MasterSwingCompareDeflect(MasterSwing Left, MasterSwing Right)
+        {
+            object val;
+            bool leftDeflect = false;
+            bool rightDeflect = false;
+
+            if (Left.Tags.TryGetValue("Deflect", out val))
+            {
+                leftDeflect = (bool)val;
+            }
+
+            if (Right.Tags.TryGetValue("Deflect", out val))
+            {
+                rightDeflect = (bool)val;
+            }
+
+            return leftDeflect.CompareTo(rightDeflect);
+        }
+
         private string GetCellDataBaseDamage(MasterSwing Data)
         {
             object damBaseObj;
@@ -709,6 +754,45 @@ namespace NWParsing_Plugin
             return GetShieldPValue(Left).CompareTo(GetShieldPValue(Right));
         }
 
+        private int GetDTDeflectValue(DamageTypeData Data)
+        {
+            if (Data.Items.Count == 0) return 0;
+
+            AttackType at = Data.Items["All"];
+            return GetAADeflectValue(at);
+        }
+
+        private string GetCellDataDeflectHits(DamageTypeData Data)
+        {
+            return GetDTDeflectValue(Data).ToString(GetIntCommas());
+        }
+
+        private string GetSqlDataDeflectHits(DamageTypeData Data)
+        {
+            return GetDTDeflectValue(Data).ToString();
+        }
+
+        private double GetDTDeflectPrecValue(DamageTypeData Data)
+        {
+            if (Data.Hits == 0) return 0;
+
+            double fv = (double)GetDTDeflectValue(Data);
+            fv *= 100.0;
+            fv /= Data.Hits;
+
+            return fv;
+        }
+
+        private string GetCellDataDeflectPrec(DamageTypeData Data)
+        {
+            return GetDTDeflectPrecValue(Data).ToString("0'%");
+        }
+
+        private string GetSqlDataDeflectPrec(DamageTypeData Data)
+        {
+            return GetDTDeflectPrecValue(Data).ToString("0'%");
+        }
+
         private int GetDTFlankValue(DamageTypeData Data)
         {
             if (Data.Items.Count == 0) return 0;
@@ -846,6 +930,86 @@ namespace NWParsing_Plugin
             return flankPrecLeft.CompareTo(flankPrecRight);
         }
 
+        private int GetAADeflectValue(AttackType Data)
+        {
+            int DeflectCount = 0;
+
+            if (Data.Items.Count == 0) return 0;
+
+            if (Data.Tags.ContainsKey("DeflectPrecCacheCount"))
+            {
+                int DeflectPrecCacheCount = (int)Data.Tags["DeflectPrecCacheCount"];
+                if (DeflectPrecCacheCount == Data.Items.Count)
+                {
+                    DeflectCount = (int)Data.Tags["DeflectPrecCacheValue"];
+                    return DeflectCount;
+                }
+            }
+
+            int count = Data.Items.Count;
+
+            for (int i = 0; i < count; i++)
+            {
+                MasterSwing ms = Data.Items[i];
+
+                object fv;
+                if ((ms.Damage > 0) && (ms.Tags.TryGetValue("Deflect", out fv)))
+                {
+                    bool Deflect = (bool)fv;
+                    if (Deflect) DeflectCount++;
+                }
+            }
+
+            Data.Tags["DeflectPrecCacheCount"] = count;
+            Data.Tags["DeflectPrecCacheValue"] = DeflectCount;
+
+            return DeflectCount;
+        }
+
+        private string GetCellDataDeflectHits(AttackType Data)
+        {
+            return GetAADeflectValue(Data).ToString(GetIntCommas());
+        }
+
+        private string GetSqlDataDeflectHits(AttackType Data)
+        {
+            return GetAADeflectValue(Data).ToString();
+        }
+
+        private int AttackTypeCompareDeflectHits(AttackType Left, AttackType Right)
+        {
+            return GetAADeflectValue(Left).CompareTo(GetAADeflectValue(Right));
+        }
+
+        private string GetCellDataDeflectPrec(AttackType Data)
+        {
+            double DeflectPrec = (double)GetAADeflectValue(Data);
+            DeflectPrec *= 100.0;
+            DeflectPrec /= (double)Data.Hits;
+
+            return DeflectPrec.ToString("0'%");
+        }
+
+        private string GetSqlDataDeflectPrec(AttackType Data)
+        {
+            double DeflectPrec = (double)GetAADeflectValue(Data);
+            DeflectPrec *= 100.0;
+            DeflectPrec /= (double)Data.Hits;
+
+            return DeflectPrec.ToString("0'%");
+        }
+
+        private int AttackTypeCompareDeflectPrec(AttackType Left, AttackType Right)
+        {
+            double DeflectPrecLeft = (double)GetAADeflectValue(Left);
+            DeflectPrecLeft /= (double)Left.Items.Count;
+
+            double DeflectPrecRight = (double)GetAADeflectValue(Right);
+            DeflectPrecRight /= (double)Right.Items.Count;
+
+            return DeflectPrecLeft.CompareTo(DeflectPrecRight);
+        }
+
         private double GetAAEffectiveness(AttackType Data)
         {
             double dmgTotal = 0;
@@ -925,6 +1089,21 @@ namespace NWParsing_Plugin
         private int CDCompareFlankDamPrec(CombatantData Left, CombatantData Right)
         {
             return GetDTFlankPrecValue(Left.Items[OutDamageName]).CompareTo(GetDTFlankPrecValue(Right.Items[OutDamageName]));
+        }
+
+        private string GetCellDataDeflectDamPrec(CombatantData Data)
+        {
+            return GetCellDataDeflectPrec(Data.Items[OutDamageName]);
+        }
+
+        private string GetSqlDataDeflectDamPrec(CombatantData Data)
+        {
+            return GetSqlDataDeflectPrec(Data.Items[OutDamageName]);
+        }
+
+        private int CDCompareDeflectDamPrec(CombatantData Left, CombatantData Right)
+        {
+            return GetDTDeflectPrecValue(Left.Items[OutDamageName]).CompareTo(GetDTDeflectPrecValue(Right.Items[OutDamageName]));
         }
 
         private string GetCellDataDmgEffectPrec(CombatantData Data)
@@ -1058,6 +1237,8 @@ namespace NWParsing_Plugin
             
             CombatantData.ColumnDefs.Add("FlankDam%",
                 new CombatantData.ColumnDef("FlankDam%", false, "VARCHAR(8)", "FlankDamPrec", GetCellDataFlankDamPrec, GetSqlDataFlankDamPrec, CDCompareFlankDamPrec));
+            CombatantData.ColumnDefs.Add("DeflectDam%",
+                new CombatantData.ColumnDef("DeflectDam%", false, "VARCHAR(8)", "DeflectDamPrec", GetCellDataDeflectDamPrec, GetSqlDataDeflectDamPrec, CDCompareDeflectDamPrec));
             CombatantData.ColumnDefs.Add("DmgEffect%",
                 new CombatantData.ColumnDef("DmgEffect%", false, "VARCHAR(8)", "DmgEffectPrec", GetCellDataDmgEffectPrec, GetSqlDataDmgEffectPrec, CDCompareDmgEffectPrec));
             CombatantData.ColumnDefs.Add("DmgTakenEffect%",
@@ -1208,6 +1389,10 @@ namespace NWParsing_Plugin
                 new DamageTypeData.ColumnDef("FlankHits", false, "INT", "FlankHits", GetCellDataFlankHits, GetSqlDataFlankHits));
             DamageTypeData.ColumnDefs.Add("Flank%",
                 new DamageTypeData.ColumnDef("Flank%", true, "VARCHAR(8)", "FlankPerc", GetCellDataFlankPrec, GetSqlDataFlankPrec));
+            DamageTypeData.ColumnDefs.Add("DeflectHits",
+                new DamageTypeData.ColumnDef("DeflectHits", false, "INT", "DeflectHits", GetCellDataDeflectHits, GetSqlDataDeflectHits));
+            DamageTypeData.ColumnDefs.Add("Deflect%",
+                new DamageTypeData.ColumnDef("Deflect%", true, "VARCHAR(8)", "DeflectPerc", GetCellDataDeflectPrec, GetSqlDataDeflectPrec));
             DamageTypeData.ColumnDefs.Add("Effectiveness",
                 new DamageTypeData.ColumnDef("Effectiveness", true, "VARCHAR(8)", "Effectiveness", GetCellDataEffectiveness, GetSqlDataEffectiveness));
 
@@ -1243,6 +1428,10 @@ namespace NWParsing_Plugin
                 new AttackType.ColumnDef("FlankHits", false, "INT", "FlankHits", GetCellDataFlankHits, GetSqlDataFlankHits, AttackTypeCompareFlankHits));
             AttackType.ColumnDefs.Add("Flank%",
                 new AttackType.ColumnDef("Flank%", true, "VARCHAR(8)", "FlankPerc", GetCellDataFlankPrec, GetSqlDataFlankPrec, AttackTypeCompareFlankPrec));
+            AttackType.ColumnDefs.Add("DeflectHits",
+                new AttackType.ColumnDef("DeflectHits", false, "INT", "DeflectHits", GetCellDataDeflectHits, GetSqlDataDeflectHits, AttackTypeCompareDeflectHits));
+            AttackType.ColumnDefs.Add("Deflect%",
+                new AttackType.ColumnDef("Deflect%", true, "VARCHAR(8)", "DeflectPerc", GetCellDataDeflectPrec, GetSqlDataDeflectPrec, AttackTypeCompareDeflectPrec));
             AttackType.ColumnDefs.Add("Effectiveness",
                 new AttackType.ColumnDef("Effectiveness", true, "VARCHAR(8)", "Effectiveness", GetCellDataEffectiveness, GetSqlDataEffectiveness, AttackTypeCompareEffectiveness));
 
@@ -1268,6 +1457,8 @@ namespace NWParsing_Plugin
             
             MasterSwing.ColumnDefs.Add("Flank",
                 new MasterSwing.ColumnDef("Flank", true, "CHAR(1)", "Flank", GetCellDataFlank, GetSqlDataFlank, MasterSwingCompareFlank));
+            MasterSwing.ColumnDefs.Add("Deflect",
+                new MasterSwing.ColumnDef("Deflect", true, "CHAR(1)", "Deflect", GetCellDataDeflect, GetSqlDataDeflect, MasterSwingCompareDeflect));
             MasterSwing.ColumnDefs.Add("BaseDamage",
                 new MasterSwing.ColumnDef("BaseDamage", true, "INT", "BaseDamageString", GetCellDataBaseDamage, GetSqlDataBaseDamage, MasterSwingCompareBaseDamage));
             MasterSwing.ColumnDefs.Add("Effectiveness",
@@ -2233,7 +2424,7 @@ namespace NWParsing_Plugin
                 if (l.evtInt == "Pn.R0jdk") // Assume this is PVP Rune Heal for now...
                 {   
                     AddCombatActionNW(
-                        (int)SwingTypeEnum.Healing, l.critical, false, l.special, l.unitTargetName,
+                        (int)SwingTypeEnum.Healing, l.critical, false, false, l.special, l.unitTargetName,
                         "PVP Heal Rune", new Dnum(-magAdj), -l.mag, -l.magBase, l.logInfo.detectedTime,
                         l.ts, l.unitTargetName, l.type);
                 }
@@ -2258,7 +2449,7 @@ namespace NWParsing_Plugin
                     // 13:07:10:11:02:20.6::,,,,Brandeor,P[201267923@5148411 Brandeor@brandeor],Campfire,Pn.Dbm4um1,HitPoints,,-525.321,0
 
                     AddCombatActionNW(
-                        (int)SwingTypeEnum.Healing, l.critical, false, l.special, l.unitTargetName,
+                        (int)SwingTypeEnum.Healing, l.critical, false, false, l.special, l.unitTargetName,
                         l.evtDsp, new Dnum(-magAdj), -l.mag, -l.magBase, l.logInfo.detectedTime,
                         l.ts, l.unitTargetName, l.type);                    
                 }
@@ -2288,7 +2479,7 @@ namespace NWParsing_Plugin
                         if (ActGlobals.oFormActMain.SetEncounter(l.logInfo.detectedTime, cgi.encName, l.encTargetName))
                         {
                             AddCombatActionNW(
-                                (int)SwingTypeEnum.Healing, l.critical, l.flank, l.unitAttackerName, cgi.unitName,
+                                (int)SwingTypeEnum.Healing, l.critical, l.flank, l.dodge, l.unitAttackerName, cgi.unitName,
                                 l.evtDsp, new Dnum(-magAdj), -l.mag, -l.magBase, l.logInfo.detectedTime,
                                 l.ts, l.unitTargetName, l.type);
                         }
@@ -2303,7 +2494,7 @@ namespace NWParsing_Plugin
                         if (ActGlobals.oFormActMain.SetEncounter(l.logInfo.detectedTime, l.encTargetName, l.encTargetName))
                         {
                             AddCombatActionNW(
-                                (int)SwingTypeEnum.Healing, l.critical, l.flank, l.unitAttackerName, unk,
+                                (int)SwingTypeEnum.Healing, l.critical, l.flank, l.dodge, l.unitAttackerName, unk,
                                 l.evtDsp, new Dnum(-magAdj), -l.mag, -l.magBase, l.logInfo.detectedTime,
                                 l.ts, l.unitTargetName, l.type);
                         }
@@ -2323,7 +2514,7 @@ namespace NWParsing_Plugin
                     // Default heal.
 
                     AddCombatActionNW(
-                        (int)SwingTypeEnum.Healing, l.critical, l.flank, l.special, l.unitAttackerName,
+                        (int)SwingTypeEnum.Healing, l.critical, l.flank, l.dodge, l.special, l.unitAttackerName,
                         l.attackType, new Dnum(-magAdj), -l.mag, -l.magBase, l.logInfo.detectedTime,
                         l.ts, l.unitTargetName, l.type);
                 }
@@ -2416,7 +2607,7 @@ namespace NWParsing_Plugin
 					ProcessNamesOST(l);
 
 					AddCombatActionNW(
-						(int)SwingTypeEnum.CureDispel, l.critical, l.flank, l.special, 
+						(int)SwingTypeEnum.CureDispel, l.critical, l.flank, l.dodge, l.special, 
 						l.unitAttackerName, l.attackType, Dnum.NoDamage, l.mag, l.magBase, 
 						l.logInfo.detectedTime, l.ts, l.unitTargetName, l.type );
 				}
@@ -2464,7 +2655,7 @@ namespace NWParsing_Plugin
                     // Target is the source as well.
 
                     AddCombatActionNW(
-                        (int)SwingTypeEnum.PowerHealing, l.critical, false, "", "Trickster [" + l.tgtDsp + "]",
+                        (int)SwingTypeEnum.PowerHealing, l.critical, false, false, "", "Trickster [" + l.tgtDsp + "]",
                         "Bait and Switch", new Dnum(-magAdj), -l.mag, 0, l.logInfo.detectedTime,
                         l.ts, l.tgtDsp, l.type);
 
@@ -2482,7 +2673,7 @@ namespace NWParsing_Plugin
                     ProcessNamesST(l);
 
                     AddCombatActionNW(
-                        (int)SwingTypeEnum.PowerHealing, l.critical, false, l.unitAttackerName, l.unitTargetName,
+                        (int)SwingTypeEnum.PowerHealing, l.critical, false, false, l.unitAttackerName, l.unitTargetName,
                         l.evtDsp, new Dnum(-magAdj), -l.mag, 0, l.logInfo.detectedTime,
                         l.ts, l.unitTargetName, l.type);
                 }
@@ -2500,7 +2691,7 @@ namespace NWParsing_Plugin
                     ProcessNamesOST(l);
 					//  Trying to not end combat via power
 					AddCombatActionNW(
-					(int)SwingTypeEnum.PowerHealing, l.critical, false, l.special,
+					(int)SwingTypeEnum.PowerHealing, l.critical, false, l.dodge, l.special,
 					l.unitAttackerName, l.attackType, new Dnum(-magAdj), -l.mag, -l.magBase,
 					l.logInfo.detectedTime, l.ts, l.unitTargetName, l.type);
                 }
@@ -2561,7 +2752,7 @@ namespace NWParsing_Plugin
                     ProcessNamesOST(l);
                  //   AddCombatActionHostile(l, (int)SwingTypeEnum.NonMelee, l.critical, l.special, l.attackType, Dnum.NoDamage, 0, l.type);
 					AddCombatActionNW(
-					(int)SwingTypeEnum.NonMelee, l.critical, l.flank, l.special,
+					(int)SwingTypeEnum.NonMelee, l.critical, l.flank, l.dodge, l.special,
 					l.unitAttackerName, l.attackType, new Dnum(-magAdj), -l.mag, -l.magBase,
 					l.logInfo.detectedTime, l.ts, l.unitTargetName, l.type);
 				}
@@ -2730,9 +2921,7 @@ namespace NWParsing_Plugin
                 }
                 else if (l.dodge)
                 {
-                    // It really looks like Dodge does not stop all damage - just reduces it by about 80%...
-                    // I have seen damaging attacks that are both Dodge and Kill in the flags.
-                    // So the target dodged but still died.
+                    // "Dodge" in the log means that the attack was Deflected, which is usually a 50% reduction in damage.
                     l.logInfo.detectedType = Color.Maroon.ToArgb();
                     AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
                 }
@@ -2828,7 +3017,7 @@ namespace NWParsing_Plugin
                 if (line.flank && this.checkBox_flankSkill.Checked) tempAttack = theAttackType + ": Flank";
 
                 AddCombatActionNW(
-                    swingType, line.critical, line.flank, special, line.unitAttackerName,
+                    swingType, line.critical, line.flank, line.dodge, special, line.unitAttackerName,
                     tempAttack, Damage, realDamage, baseDamage, line.logInfo.detectedTime,
                     line.ts, line.unitTargetName, theDamageType);
             }
@@ -2836,7 +3025,7 @@ namespace NWParsing_Plugin
 
         // Wrapper around AddCombatAction to add extra Tags that are used in the NW plugin.
         private void AddCombatActionNW(
-            int swingType, bool critical, bool flank, string special, string attacker, string theAttackType, 
+            int swingType, bool critical, bool flank, bool deflect, string special, string attacker, string theAttackType, 
             Dnum damage, float realDamage, float baseDamage,
             DateTime time, int timeSorter, string victim, string theDamageType)
         {
@@ -2845,6 +3034,7 @@ namespace NWParsing_Plugin
             ms.Tags.Add("DamageF", realDamage);
             ms.Tags.Add("BaseDamage", baseDamage);
             ms.Tags.Add("Flank", flank);
+            ms.Tags.Add("Deflect", deflect);
 
             if (baseDamage > 0)
             {
@@ -3396,7 +3586,6 @@ namespace NWParsing_Plugin
                             break;
                         case "Dodge":
                             dodge = true;
-                            special = (extraFlagCount++ > 0) ? (special + " | " + sflag) : sflag;
                             break;
                         case "Immune":
                             immune = true;
