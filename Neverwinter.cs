@@ -2332,30 +2332,30 @@ namespace NWParsing_Plugin
 
         private void ProcessActionShields(ParsedLine l)
         {
-            int magAdj = (int)Math.Round(l.mag);
-            int magBaseAdj = (int)Math.Round(l.magBase);
-
-            // Shielding goes first and acts like a heal to cancel coming damage.  Attacker has his own damage line.  example:
-
-            // 13:07:02:10:48:49.1::Neston,P[200243656@6371989 Neston@adamtech],,*,Flemming Fedtgebis,P[201082649@7532407 Flemming Fedtgebis@feehavregroed],Forgemaster's Flame,Pn.Lbf9ic,Shield,,-349.348,-154.608
-            // 13:07:02:10:48:49.1::SorXian,P[201063397@7511146 SorXian@sorxian],,*,Flemming Fedtgebis,P[201082649@7532407 Flemming Fedtgebis@feehavregroed],Entangling Force,Pn.Oonws91,Shield,,-559.613,-247.663
-            // 13:07:02:10:48:49.1::Neston,P[200243656@6371989 Neston@adamtech],,*,Flemming Fedtgebis,P[201082649@7532407 Flemming Fedtgebis@feehavregroed],Forgemaster's Flame,Pn.Lbf9ic,Radiant,,154.608,349.348
-            // 13:07:02:10:48:49.1::SorXian,P[201063397@7511146 SorXian@sorxian],,*,Flemming Fedtgebis,P[201082649@7532407 Flemming Fedtgebis@feehavregroed],Entangling Force,Pn.Oonws91,Arcane,,247.663,559.613
-            
-            // NOTE:
-            // Notice that the mag and magBase numbers are swap in the shield line verse the damage line.
-            // Therefore the amount shield == magBase ???
-            // The mag is meaningless ???
-            // If mag > magBase on the attack is all damage not shielded ???  (ie high armor pen)
+            // Blue shielding goes first and acts like a heal to cancel incoming damage.  Any damage remaining is on another line.
+            // Fully shielded, base damage is in the Shield line:
+            // 19:05:14:00:02:22.7::Arcturia,C[41429 M16_Boss_Arcturia_Dungeon],Miasma,C[41635 M16_Boss_Arcturia_Necrotic_Smash_Entity],AxiosDaslin,P[506740054@14456799 AxiosDaslin@darkhraan],Miasma,Pn.Ii7o23,Shield,,-356.91,-185.791
+            // Partially shielded, full base damage is in the Physical line:
+            // 19:05:14:00:02:22.6::Arcturia,C[41429 M16_Boss_Arcturia_Dungeon],,*,AxiosDaslin,P[506740054@14456799 AxiosDaslin@darkhraan],Necrotic Smash,Pn.Z5752d,Shield,,-7095.93,-6000
+            // 19:05:14:00:02:22.6::Arcturia,C[41429 M16_Boss_Arcturia_Dungeon],,*,AxiosDaslin,P[506740054@14456799 AxiosDaslin@darkhraan],Necrotic Smash,Pn.Z5752d,Physical,,69280.8,89031.3
+            // Here the base damage is 89031.3, the adjusted damage is 69280.8+6000=75280.8, of which the shield absorbed 6000.
 
             // NOTE:
-            // NW Patch on 7/17/2013 changed shield to report blocked damage in the mag field.
-            // 13:07:18:10:25:54.2::Miner,C[1445 Mindflayer_Duergarminerthrall],,*,Largoevo,P[201228983@6531604 Largoevo@largoevo],Melee Attack,Pn.M7kie6,Shield,,-242.837,0
-            // Actuall not sure on this....
-            
-            //
-            // Target prevented damage.
-            //
+            // Notice that the mag and magBase numbers are swapped in the shield line versus the damage line, so magBase is the damage absorbed, and mag is how much damage that was before adjustments for Defense and such.
+
+            // If magBase is 0, mag is the damage absorbed, and the base damage is not specified.  This happens in M16 with Paladin and Fighter shields.
+            // Fully shielded, no way to determine base damage:
+            // 19:05:20:17:14:49.0::Trobriand,C[30160 M16_Lairofthemadmage_Boss_Trobriand],,*,Alec Persessi,P[513125329@28357045 Alec Persessi@valyana],Punch,Pn.7gjvbi,Shield,,-134031,0
+            // Partially shielded, base damage is specified in the second line:
+            // 19:05:20:17:14:51.7::Trobriand,C[30160 M16_Lairofthemadmage_Boss_Trobriand],,*,Alec Persessi,P[513125329@28357045 Alec Persessi@valyana],Strike,Pn.Bbw7km1,Shield,ShieldBreak,-97270.2,0
+            // 19:05:20:17:14:51.7::Trobriand,C[30160 M16_Lairofthemadmage_Boss_Trobriand],,*,Alec Persessi,P[513125329@28357045 Alec Persessi@valyana],Strike,Pn.Bbw7km1,Physical,ShieldBreak,40906.3,284900
+
+            // For some reason we sometimes get an extra line blocking 0 damage, ignore it:
+            // 19:05:21:11:35:43.8::Arcturia,C[13942 M16_Boss_Arcturia_Dungeon],,*,Tropo,P[512369627@6638553 Tropo@horowata],Arcturia's Wail,Pn.Be1dij1,Shield,,-0,0
+            // 19:05:21:11:35:43.8::Arcturia,C[13942 M16_Boss_Arcturia_Dungeon],,*,Tropo,P[512369627@6638553 Tropo@horowata],Arcturia's Wail,Pn.Be1dij1,Shield,ShieldBreak,-18267,0
+            // 19:05:21:11:35:43.8::Arcturia,C[13942 M16_Boss_Arcturia_Dungeon],,*,Tropo,P[512369627@6638553 Tropo@horowata],Arcturia's Wail,Pn.Be1dij1,Physical,ShieldBreak,215063,333000
+            if (l.mag == -0 && l.magBase == 0)
+                return;
 
             l.logInfo.detectedType = l.critical ? Color.Green.ToArgb() : Color.DarkGreen.ToArgb();
 
@@ -2372,19 +2372,19 @@ namespace NWParsing_Plugin
                 float mag = 0;
                 float magBase = 0;
 
-                // This is just weird...
                 if (l.magBase == 0) // Don't use magBaseAdj here.  Rounded to zero is not zero.
                 {
-                    shielded = new Dnum( -magAdj );
                     mag = -l.mag;
                     magBase = -l.magBase;
                 }
                 else
                 {
-                    shielded = new Dnum(-magBaseAdj);
                     mag = -l.magBase;
                     magBase = -l.mag;
                 }
+                l.mag = mag;
+                l.magBase = magBase;
+                shielded = new Dnum((int)mag);
 
                 // SwingType = Heal
                 // special = attacker
@@ -2577,7 +2577,7 @@ namespace NWParsing_Plugin
 
             string special = l.special;
 
-            MasterSwing msShielded = unmatchedShieldLines.MatchDamage(l);
+            MasterSwing msShielded = unmatchedShieldLines.MatchDamage(l, this);
             if (msShielded != null)
             {
                 // Fix up the shield line.
@@ -2602,6 +2602,8 @@ namespace NWParsing_Plugin
                         special = l.special + " | " + shieldSpecialText;
                     }
 
+                    l.mag += df;
+                    magAdj = (int)l.mag;
                     float shielded = df / l.mag;
                     msShielded.Tags.Add("ShieldDmgF", l.mag);
                     msShielded.Tags.Add("ShieldP", shielded);
@@ -2815,7 +2817,7 @@ namespace NWParsing_Plugin
         }
 
         // For hostile actions only.  Handles the SetEncounter().
-        private void AddCombatActionHostile(
+        internal void AddCombatActionHostile(
             ParsedLine line, int swingType, bool critical, string special, string theAttackType, Dnum Damage, float realDamage, string theDamageType, float baseDamage=0)
         {
             // Use encounter names attacker and target here.  This allows filtering
@@ -3215,7 +3217,16 @@ namespace NWParsing_Plugin
             active.AddLast(sl);
         }
 
-        public MasterSwing MatchDamage(ParsedLine line)
+        private void RemoveUnmatched (LinkedListNode<ShieldLine> cur, NW_Parser parser)
+        {
+            // Drop old and unmatched shield line; the attack must have been fully absorbed.
+            ShieldLine sl = cur.Value;
+            ParsedLine l = sl.line;
+            parser.AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, "Shield", l.attackType, new Dnum((int)l.mag), l.mag, l.type, l.magBase);
+            active.Remove(cur);
+        }
+
+        public MasterSwing MatchDamage(ParsedLine line, NW_Parser parser)
         {
             LinkedListNode<ShieldLine> slnNext = active.First;
 
@@ -3271,9 +3282,8 @@ namespace NWParsing_Plugin
 
                     if (diff.TotalMilliseconds > 500)
                     {
-                        // Drop old and unmatch shield lines.
                         // Generally shield line should match in <= 100ms.
-                        active.Remove(cur);
+                        RemoveUnmatched(cur, parser);
                     }
                 }
             }
