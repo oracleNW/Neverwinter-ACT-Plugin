@@ -2081,8 +2081,17 @@ namespace NWParsing_Plugin
             if (line.ownDsp == "" && line.ownInt == "")
             {
                 // Ugly fix for lines without an owner
-                line.ownDsp = NW_Parser.unk;
-                line.ownInt = NW_Parser.unkInt;
+                if (line.srcDsp != "")
+                {
+                    // If there's a source, use that.
+                    line.ownDsp = line.srcDsp;
+                    line.ownInt = line.srcInt;
+                }
+                else
+                {
+                    line.ownDsp = NW_Parser.unk;
+                    line.ownInt = NW_Parser.unkInt;
+                }
             }
             else if (line.ownInt[0] == 'P') { line.ownEntityType = EntityType.Player; }
             else if (line.ownInt[0] == 'C') 
@@ -2229,7 +2238,7 @@ namespace NWParsing_Plugin
 
                 case EntityType.Pet:
                     {
-                        OwnerInfo owner = petOwnerRegistery.Resolve(line.srcInt);
+                        OwnerInfo owner = petOwnerRegistery.Resolve(line.srcInt, line.srcDsp);
 
                         if (owner != null)
                         {
@@ -2255,7 +2264,7 @@ namespace NWParsing_Plugin
                     }
                 case EntityType.Entity:
                     {
-                        OwnerInfo owner = entityOwnerRegistery.Resolve(line.srcInt);
+                        OwnerInfo owner = entityOwnerRegistery.Resolve(line.srcInt, line.srcDsp);
                         if (owner != null)
                         {
                             if (owner.ownerEntityType == EntityType.Creature)
@@ -2331,7 +2340,7 @@ namespace NWParsing_Plugin
 
                 case EntityType.Pet:
                     {
-                        line.tgtOwnerInfo = petOwnerRegistery.Resolve(line.tgtInt);
+                        line.tgtOwnerInfo = petOwnerRegistery.Resolve(line.tgtInt, line.tgtDsp);
 
                         if (line.tgtOwnerInfo != null)
                         {
@@ -2357,7 +2366,7 @@ namespace NWParsing_Plugin
                     }
                 case EntityType.Entity:
                     {
-                        line.tgtOwnerInfo = entityOwnerRegistery.Resolve(line.tgtInt);
+                        line.tgtOwnerInfo = entityOwnerRegistery.Resolve(line.tgtInt, line.tgtDsp);
                         if (line.tgtOwnerInfo != null)
                         {
                             // What does this mean???
@@ -3228,7 +3237,7 @@ namespace NWParsing_Plugin
     {
         void Clear();
         void Register(ParsedLine line);
-        OwnerInfo Resolve(string nameInt);
+        OwnerInfo Resolve(string nameInt, string nameDsp);
     }
 
     internal class PetOwnerRegistery : OwnerRegistery
@@ -3289,17 +3298,24 @@ namespace NWParsing_Plugin
                     OwnerInfo.petInt = line.srcInt;
 
                     petPlayerCache.Add(line.srcInt, OwnerInfo);
+                    petPlayerCache.Add(line.srcDsp, OwnerInfo);
                     playerPetCache.Add(line.ownInt, OwnerInfo);
                 }
             }
         }
 
-        public OwnerInfo Resolve(string nameInt)
+        public OwnerInfo Resolve(string nameInt, string nameDsp)
         {
             // Lookup the creature to see if it is a pet.
 
             OwnerInfo petOwner = null;
             if (petPlayerCache.TryGetValue(nameInt, out petOwner))
+            {
+                return petOwner;
+            }
+
+            // If the player resummoned their pet it will have changed nameInt, so fall back to nameDsp.
+            if (petPlayerCache.TryGetValue(nameDsp, out petOwner))
             {
                 return petOwner;
             }
@@ -3355,7 +3371,7 @@ namespace NWParsing_Plugin
             }
         }
 
-        public OwnerInfo Resolve(string nameInt)
+        public OwnerInfo Resolve(string nameInt, string nameDsp)
         {
             // Lookup the creature to see if it is a pet.
 
