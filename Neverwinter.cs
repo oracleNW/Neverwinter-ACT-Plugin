@@ -3516,8 +3516,22 @@ namespace NWParsing_Plugin
 
             this.logInfo = logInfo;
             this.ts = ++ActGlobals.oFormActMain.GlobalTimeSorter;
-			string overloadfix = logInfo.logLine.Replace("Slayer, Rank", "Slayer Rank");
-			string[] split = overloadfix.Split(NW_Parser.separatorLog, StringSplitOptions.None);
+            string line = logInfo.logLine;
+			string[] split = line.Split(NW_Parser.separatorLog, StringSplitOptions.None);
+
+            if (split.Length > 13)
+            {
+                // Too many fields, probably one of the names has a comma in it.
+                string overloadfix = line.Replace(", ", " ");
+                split = overloadfix.Split(NW_Parser.separatorLog, StringSplitOptions.None);
+            }
+            if (split.Length != 13)
+            {
+                // Still not right, give up.
+                this.error = true;
+                return;
+            }
+
             ownDsp = split[1];
             ownInt = split[2];
             srcDsp = split[3];
@@ -3530,10 +3544,6 @@ namespace NWParsing_Plugin
             flags = split[10];
             mag = float.Parse(split[11], NW_Parser.cultureLog);
             magBase = float.Parse(split[12], NW_Parser.cultureLog);
-            if (split.Length != 13)
-            {
-                this.error = true;
-            }
 
             ownEntityType = EntityType.Unknown;
             srcEntityType = EntityType.Unknown;
