@@ -2809,52 +2809,8 @@ namespace NWParsing_Plugin
                     msShielded.Tags.Add("ShieldP", shielded);
                 }
             }
-            if (l.evtInt == "Autodesc.Combatevent.Falling")
-            {
-                // Falling damage to not start combat...
-                if (ActGlobals.oFormActMain.InCombat)
-                {
-                    ProcessNamesOST(l);
-                    AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
-                }
-            } 
-			else if (l.evtInt == "Pn.Mlg6n01")
-            {
-                // Poison Spike Trap to not start combat...
-                if (ActGlobals.oFormActMain.InCombat)
-                {
-                    ProcessNamesOST(l);
-                    AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
-                }
-            } 
-			else if (l.evtInt == "Pn.Sv2m0c1")
-            {
-                // Spike Trap to not start combat...
-                if (ActGlobals.oFormActMain.InCombat)
-                {
-                    ProcessNamesOST(l);
-                    AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
-                }
-            }
-            else if (l.evtInt == "Pn.Rjmxw51")
-            {
-                // Arrow Trap to not start combat...
-                if (ActGlobals.oFormActMain.InCombat)
-                {
-                    ProcessNamesOST(l);
-                    AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
-                }
-            }
- 			else if (l.evtInt == "Pn.O4hc6g1")
-            {
-                // Fall damage to not start combat
-                if (ActGlobals.oFormActMain.InCombat)
-                {
-                    ProcessNamesOST(l);
-                    AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, special, l.attackType, magAdj, l.mag, l.type, l.magBase);
-                }
-			}
-			else if (l.evtInt == "Pn.Wypyjw1") // Knight's Valor,
+
+            if (l.evtInt == "Pn.Wypyjw1") // Knight's Valor,
             {
                 // "13:07:18:10:30:48.3::Largoevo,P[201228983@6531604 Largoevo@largoevo],Ugan the Abominable,C[1469 Mindflayer_Miniboss_Ugan],Largoevo,P[201228983@6531604 Largoevo@largoevo],Knight's Valor,Pn.Wypyjw1,Physical,,449.42,1195.48
                 // Attack goes SRC -> TRG and ignore the owner.  The SRC is not the owner's pet.
@@ -2918,7 +2874,7 @@ namespace NWParsing_Plugin
                     {
                         // 13:07:18:10:49:21.6::Tristan,C[2120 Pet_Dog],,*,Oll'noth the Dominator,C[1997 Mindflayer_Eventboss],Takedown,Pn.Ebxsjf,KnockBack,Immune,0,0
 
-                        // Ignore these for now...
+                        // Ignore CC immunity for now...
                         l.logInfo.detectedType = Color.Gray.ToArgb();
                     }
                     else
@@ -2954,6 +2910,17 @@ namespace NWParsing_Plugin
         {
             l.logInfo.detectedType = Color.Gray.ToArgb();
 
+            if (!ActGlobals.oFormActMain.InCombat
+                && (l.evtInt == "Autodesc.Combatevent.Falling"
+                    || l.evtInt == "Pn.Mlg6n01" // Poison Spike Trap
+                    || l.evtInt == "Pn.Sv2m0c1" // Spike Trap
+                    || l.evtInt == "Pn.Rjmxw51" // Arrow Trap
+                    || l.evtInt == "Pn.O4hc6g1")) // Fall damage
+            {
+                // Ignore, environmental damage shouldn't start an encounter.
+                return;
+            }
+
             if (l.type == "AttribModExpire") // Cleanse
             {
                 ProcessActionCleanse(l);
@@ -2971,11 +2938,7 @@ namespace NWParsing_Plugin
             {
                 ProcessActionHeals(l);
             }
- 			else if (l.evtInt == "Pn.O4hc6g1")
-			{
-				ProcessActionDamage(l);
-			}
-			else if (l.type == "Shield")
+            else if (l.type == "Shield")
             {
                 ProcessActionShields(l);
             }
