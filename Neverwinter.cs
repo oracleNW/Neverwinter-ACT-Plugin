@@ -326,7 +326,7 @@ namespace NWParsing_Plugin
         private PetOwnerRegistery petOwnerRegistery = new PetOwnerRegistery();
         private EntityOwnerRegistery entityOwnerRegistery = new EntityOwnerRegistery();
 
-        private UnmatchedShieldLines unmatchedShieldLines = new UnmatchedShieldLines();
+        private UnmatchedShieldLines unmatchedShieldLines = null;
 
         // For tracking source of Chaotic Growth heals.
         private Dictionary<string, ChaoticGrowthInfo> magicMissileLastHit = new Dictionary<string, ChaoticGrowthInfo>();
@@ -478,6 +478,8 @@ namespace NWParsing_Plugin
             // Set status text to successfully loaded
             lblStatus = pluginStatusText;
             lblStatus.Text = "Neverwinter ACT plugin loaded";
+
+            unmatchedShieldLines = new UnmatchedShieldLines(this);
         }
 
         
@@ -2532,28 +2534,49 @@ namespace NWParsing_Plugin
 
         private void ProcessActionShields(ParsedLine l)
         {
-            // Blue shielding goes first and acts like a heal to cancel incoming damage.  Any damage remaining is on another line.
-            // Fully shielded, base damage is in the Shield line:
-            // 19:05:14:00:02:22.7::Arcturia,C[41429 M16_Boss_Arcturia_Dungeon],Miasma,C[41635 M16_Boss_Arcturia_Necrotic_Smash_Entity],AxiosDaslin,P[506740054@14456799 AxiosDaslin@darkhraan],Miasma,Pn.Ii7o23,Shield,,-356.91,-185.791
-            // Partially shielded, full base damage is in the Physical line:
-            // 19:05:14:00:02:22.6::Arcturia,C[41429 M16_Boss_Arcturia_Dungeon],,*,AxiosDaslin,P[506740054@14456799 AxiosDaslin@darkhraan],Necrotic Smash,Pn.Z5752d,Shield,,-7095.93,-6000
-            // 19:05:14:00:02:22.6::Arcturia,C[41429 M16_Boss_Arcturia_Dungeon],,*,AxiosDaslin,P[506740054@14456799 AxiosDaslin@darkhraan],Necrotic Smash,Pn.Z5752d,Physical,,69280.8,89031.3
-            // Here the base damage is 89031.3, the adjusted damage is 69280.8+6000=75280.8, of which the shield absorbed 6000.
+            // Blue overshields:
+            // Fully shielded, Physical is damage absorbed:
+            // 20:06:10:15:39:10.1::Halaster,C[64 M17_Trial_Boss_Halaster],,*,Character, P[513125329@28357045 Character@user], Arcane Blast,Pn.Zu6srm,Shield,,-190600,0
+            // 20:06:10:15:39:10.1::Halaster,C[64 M17_Trial_Boss_Halaster],,*,Character, P[513125329@28357045 Character@user], Arcane Blast,Pn.Zu6srm,Physical,,190600,381200
+            // Partially shielded, Physical is total damage:
+            // 20:06:10:10:25:20.9::Halaster,C[10 M17_Trial_Boss_Halaster],,*,Character,P[513125329@28357045 Character@user],Duumvirate,Pn.T3r6sh,Shield,ShieldBreak,-388515,0
+            // 20:06:10:10:25:20.9::Halaster,C[10 M17_Trial_Boss_Halaster],,*,Character, P[513125329@28357045 Character@user], Duumvirate, Pn.T3r6sh,Physical,ShieldBreak,668405,1.33681e+06
 
-            // NOTE:
-            // Notice that the mag and magBase numbers are swapped in the shield line versus the damage line, so magBase is the damage absorbed, and mag is how much damage that was before adjustments for Defense and such.
-
-            // If magBase is 0, mag is the damage absorbed, and the base damage is not specified.  This happens in M16 with Paladin and Fighter shields.
+            // Tank shields:
             // Fully shielded, no way to determine base damage:
-            // 19:05:20:17:14:49.0::Trobriand,C[30160 M16_Lairofthemadmage_Boss_Trobriand],,*,Alec Persessi,P[513125329@28357045 Alec Persessi@valyana],Punch,Pn.7gjvbi,Shield,,-134031,0
-            // Partially shielded, base damage is specified in the second line:
-            // 19:05:20:17:14:51.7::Trobriand,C[30160 M16_Lairofthemadmage_Boss_Trobriand],,*,Alec Persessi,P[513125329@28357045 Alec Persessi@valyana],Strike,Pn.Bbw7km1,Shield,ShieldBreak,-97270.2,0
-            // 19:05:20:17:14:51.7::Trobriand,C[30160 M16_Lairofthemadmage_Boss_Trobriand],,*,Alec Persessi,P[513125329@28357045 Alec Persessi@valyana],Strike,Pn.Bbw7km1,Physical,ShieldBreak,40906.3,284900
+            // 20:03:13:22:14:10.7::Pillar Fire,C[24305 M18_Dungeon_Boss_2_Pillar_Fire],,*,Character,P[513125329@28357045 Character@user],Pool of Fire,Pn.Yg7mkc1,Shield,,-43312.5,0
+            // Partially shielded, Physical is damage to HP:
+            // 20:06:10:10:45:25.3::Halaster,C[539 M17_Trial_Boss_Halaster],,*,Character,P[513125329@28357045 Character@user],Duumvirate,Pn.T3r6sh,Shield,ShieldBreak,-540850,0
+            // 20:06:10:10:45:25.3::Halaster,C[539 M17_Trial_Boss_Halaster],,*,Character, P[513125329@28357045 Character@user], Duumvirate, Pn.T3r6sh,Physical,Dodge | ShieldBreak,355223,3.98255e+06
+            // Half shielded by Paladin Divine Champion:
+            // 20:06:10:15:29:43.0::Halaster,C[40 M17_Trial_Boss_Halaster],,*,Character, P[513125329@28357045 Character@user], Arcane Blast,Pn.Zu6srm,Shield,,-49459.2,0
+            // 20:06:10:15:29:43.0::Halaster,C[40 M17_Trial_Boss_Halaster],,*,Character, P[513125329@28357045 Character@user], Arcane Blast,Pn.Zu6srm,Physical,Dodge,49459.2,395673
+            // Notice that this looks identical to the fully blue-shielded case above apart from the effectiveness.
+
+            // Fully absorbed by both types of Shield, Physical is damage absorbed:
+            // 20:03:13:22:14:53.8::Pillar Fire,C[24308 M18_Dungeon_Boss_2_Pillar_Fire],,*,Character, P[513125329@28357045 Character@user], Pool of Fire, Pn.Yg7mkc1,Shield,,-21284.9,0
+            // 20:03:13:22:14:53.8::Pillar Fire,C[24308 M18_Dungeon_Boss_2_Pillar_Fire],,*,Character, P[513125329@28357045 Character@user], Pool of Fire, Pn.Yg7mkc1,Shield,,-21284.9,0
+            // 20:03:13:22:14:53.8::Pillar Fire,C[24308 M18_Dungeon_Boss_2_Pillar_Fire],,*,Character, P[513125329@28357045 Character@user], Pool of Fire, Pn.Yg7mkc1,Physical,,42569.9,86625
+            // There's no way to tell which line is which type of shield.
+
+            // Fully absorbed, breaking tank shield but not overshield, Physical damage number is the damage absorbed:
+            // 20:06:10:10:17:34.7::Halaster,C[10 M17_Trial_Boss_Halaster],,*,Character, P[513125329@28357045 Character@user], Duumvirate, Pn.6h4go6,Shield,ShieldBreak,-286873,0
+            // 20:06:10:10:17:34.7::Halaster,C[10 M17_Trial_Boss_Halaster],,*,Character, P[513125329@28357045 Character@user], Duumvirate, Pn.6h4go6,Shield,ShieldBreak,-158627,0
+            // 20:06:10:10:17:34.7::Halaster,C[10 M17_Trial_Boss_Halaster],,*,Character, P[513125329@28357045 Character@user], Duumvirate, Pn.6h4go6,Physical,ShieldBreak,445500,891000
+
+            // Not quite fully absorbed, breaking both shields, so Physical damage number is the damage to HP:
+            // 20:06:10:10:17:34.8::Halaster,C[10 M17_Trial_Boss_Halaster],,*,Barbarian,P[514242424@5215280 Barbarian@other],Duumvirate,Pn.T3r6sh,Shield,ShieldBreak,-402401,0
+            // 20:06:10:10:17:34.8::Halaster,C[10 M17_Trial_Boss_Halaster],,*,Barbarian,P[514242424@5215280 Barbarian@other],Duumvirate,Pn.T3r6sh,Shield,ShieldBreak,-448137,0
+            // 20:06:10:10:17:34.8::Halaster,C[10 M17_Trial_Boss_Halaster],,*,Barbarian,P[514242424@5215280 Barbarian@other],Duumvirate,Pn.T3r6sh,Physical,ShieldBreak,49144.1,1.79936e+06
+
+            // So it seems that we need to collect up to two shield lines per Physical line.  If they add up to the same amount as Physical, it's fully shielded; otherwise it's partial.
+            // There's no obvious way to distinguish the two partially shielded cases; I guess we need to distinguish them based on whether adding the absorbed damage would make effectiveness
+            // improbably high.  See ProcessActionDamage for the implementation.
 
             // For some reason we sometimes get an extra line blocking 0 damage, ignore it:
-            // 19:05:21:11:35:43.8::Arcturia,C[13942 M16_Boss_Arcturia_Dungeon],,*,Tropo,P[512369627@6638553 Tropo@horowata],Arcturia's Wail,Pn.Be1dij1,Shield,,-0,0
-            // 19:05:21:11:35:43.8::Arcturia,C[13942 M16_Boss_Arcturia_Dungeon],,*,Tropo,P[512369627@6638553 Tropo@horowata],Arcturia's Wail,Pn.Be1dij1,Shield,ShieldBreak,-18267,0
-            // 19:05:21:11:35:43.8::Arcturia,C[13942 M16_Boss_Arcturia_Dungeon],,*,Tropo,P[512369627@6638553 Tropo@horowata],Arcturia's Wail,Pn.Be1dij1,Physical,ShieldBreak,215063,333000
+            // 19:05:21:11:35:43.8::Arcturia,C[13942 M16_Boss_Arcturia_Dungeon],,*,Third,P[512369627@6638553 Third@third],Arcturia's Wail,Pn.Be1dij1,Shield,,-0,0
+            // 19:05:21:11:35:43.8::Arcturia,C[13942 M16_Boss_Arcturia_Dungeon],,*,Third,P[512369627@6638553 Third@third],Arcturia's Wail,Pn.Be1dij1,Shield,ShieldBreak,-18267,0
+            // 19:05:21:11:35:43.8::Arcturia,C[13942 M16_Boss_Arcturia_Dungeon],,*,Third,P[512369627@6638553 Third@third],Arcturia's Wail,Pn.Be1dij1,Physical,ShieldBreak,215063,333000
             if (l.mag == -0 && l.magBase == 0)
                 return;
 
@@ -2777,7 +2800,7 @@ namespace NWParsing_Plugin
 
             string special = l.special;
 
-            MasterSwing msShielded = unmatchedShieldLines.MatchDamage(l, this);
+            MasterSwing msShielded = unmatchedShieldLines.MatchDamage(l);
             if (msShielded != null)
             {
                 // Fix up the shield line.
@@ -2802,7 +2825,28 @@ namespace NWParsing_Plugin
                         special = l.special + " | " + shieldSpecialText;
                     }
 
-                    l.mag += df;
+                    // FIXME Track whether a player is a tank?  We only ever need to add if they are.
+                    if ((int)df == (int)l.mag)
+                    {
+                        // If absorbed == magnitude, it was probably fully absorbed and we don't want to add them.
+                        // But it might have been half-absorbed by Paladin Divine Champion, so check iff effectiveness is too low.
+                        // Add if the effectiveness is lower than half what we expect (~50% normally, ~25% with deflect).
+                        // This can wrongly add if DR is buffed to over 74% (max is 80%), but that's rare even in heal checks.
+                        float dr = (float)(l.dodge ? 0.13 : 0.26);
+                        if (l.mag < l.magBase * dr)
+                            l.mag += df;
+                    }
+                    else
+                    {
+                        // If absorbed != magnitude, we want to add iff the attack broke a tank's shield.
+                        // Add unless the effectiveness with it added is higher than we expect.
+                        // This can wrongly add if the absorbed amount is small compared to the attack size, but that doesn't make much difference.
+                        // This can wrongly fail to add if the player has uncapped defense, but that's unlikely for a tank.
+                        float dr = (float)(l.dodge ? 0.26 : 0.51); // Expect at least 50% DR and 50% deflect severity.
+                        float sum = l.mag + df;
+                        if (sum < l.magBase * dr)
+                            l.mag = sum;
+                    }
                     magAdj = (int)l.mag;
                     float shielded = df / l.mag;
                     msShielded.Tags.Add("ShieldDmgF", l.mag);
@@ -3368,13 +3412,24 @@ namespace NWParsing_Plugin
         // Should act as a FIFO if 100% matches.
         private LinkedList<ShieldLine> active = new LinkedList<ShieldLine>();
 
-        public UnmatchedShieldLines()
+        // Keep a pointer to the parser so we can add damage events for attacks that are never matched.
+        private NW_Parser parser;
+
+        public UnmatchedShieldLines(NW_Parser p)
         {
+            parser = p;
         }
 
         public void Clear()
         {
-            active.Clear();
+            LinkedListNode<ShieldLine> slnNext = active.First;
+            if (slnNext != null)
+            {
+                LinkedListNode<ShieldLine> cur = slnNext;
+                RemoveUnmatched(cur);
+                slnNext = active.First;
+            }
+            //active.Clear();
         }
 
         public void AddShield(MasterSwing ms, ParsedLine line)
@@ -3386,18 +3441,20 @@ namespace NWParsing_Plugin
             active.AddLast(sl);
         }
 
-        private void RemoveUnmatched (LinkedListNode<ShieldLine> cur, NW_Parser parser)
+        private void RemoveUnmatched (LinkedListNode<ShieldLine> cur)
         {
             // Drop old and unmatched shield line; the attack must have been fully absorbed.
             ShieldLine sl = cur.Value;
             ParsedLine l = sl.line;
-            parser.AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, "Shield", l.attackType, new Dnum((int)l.mag), l.mag, l.type, l.magBase);
+            parser.AddCombatActionHostile(l, (int)SwingTypeEnum.Melee, l.critical, "Shield", l.attackType, new Dnum((int)l.mag), l.mag, "Physical", l.magBase);
             active.Remove(cur);
         }
 
-        public MasterSwing MatchDamage(ParsedLine line, NW_Parser parser)
+        public MasterSwing MatchDamage(ParsedLine line)
         {
             LinkedListNode<ShieldLine> slnNext = active.First;
+
+            MasterSwing found = null;
 
             while (slnNext != null)
             {
@@ -3431,8 +3488,16 @@ namespace NWParsing_Plugin
 13:09:26:09:36:20.9::Lord DopeVIII,P[200441364@6420568 Lord DopeVIII@lorddopeviii],,*,,*,Shielded Resurgence,Pn.Mrczs41,Null,ShowPowerDisplayName,0,0
                 */
 
+                // Check expired.
+                TimeSpan diff = line.logInfo.detectedTime - sl.ms.Time;
+
+                if (diff.TotalMilliseconds > 500)
+                {
+                    // Generally shield line should match in <= 100ms.
+                    RemoveUnmatched(cur);
+                }
                 // Compare
-                if ((sl.line.evtInt == line.evtInt) &&
+                else if ((sl.line.evtInt == line.evtInt) &&
                         (sl.line.ownInt == line.ownInt) &&
                         // (sl.line.srcInt == line.srcInt) &&
                         (sl.line.tgtInt == line.tgtInt) &&
@@ -3442,22 +3507,19 @@ namespace NWParsing_Plugin
                 {
                     // Matched
                     active.Remove(cur);
-                    return sl.ms;
-                }
-                else
-                {
-                    // Check expired.
-                    TimeSpan diff = line.logInfo.detectedTime - sl.ms.Time;
-
-                    if (diff.TotalMilliseconds > 500)
+                    if (found == null)
+                        found = sl.ms;
+                    else
                     {
-                        // Generally shield line should match in <= 100ms.
-                        RemoveUnmatched(cur, parser);
+                        // Add the damage from this line to the DamageF tag on 'found'.
+                        float fd = (float)found.Tags["DamageF"];
+                        fd += sl.line.mag;
+                        found.Tags["DamageF"] = fd;
                     }
                 }
             }
 
-            return null;
+            return found;
         }
     }
 
