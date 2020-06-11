@@ -72,4 +72,4 @@ Disclaimer
 =========================
 This repository is a git backup from other people's work being shared at [ADVANCED COMBAT TRACKER PLUGIN FOR NEVERWINTER](https://www.arcgames.com/en/forums/neverwinter#/discussion/1238063/advanced-combat-tracker-plugin-for-neverwinter-updates-feb-2018)
 
-[nwcs]: https://bitbucket.org/nisckis/neverwinter-act-plugin/raw/master/Neverwinter.cs
+[nwcs]: https://raw.githubusercontent.com/jicama/Neverwinter-ACT-Plugin/master/Neverwinter.cs

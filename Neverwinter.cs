@@ -15,8 +15,19 @@ using System.Net;
 
 [assembly: AssemblyTitle("Neverwinter Parsing Plugin")]
 [assembly: AssemblyDescription("A basic parser that reads the combat logs in Neverwinter.")]
-[assembly: AssemblyCopyright("dragonsbite, designedbyrng, nils.brummond@gmail.com based on: Antday <Unique> based on STO Plugin from Hilbert@mancom, Pirye@ucalegon")]
-[assembly: AssemblyVersion("1.2.6.0")]
+[assembly: AssemblyCopyright("jicama, dragonsbite, designedbyrng, nils.brummond@gmail.com based on: Antday <Unique> based on STO Plugin from Hilbert@mancom, Pirye@ucalegon")]
+[assembly: AssemblyVersion("1.2.7.0")]
+
+/* Version History - jicama (@valyana in NW)
+ * 1.2.7.0 - 6-11-2020
+ * - Greatly improve shield tracking for mod 17/18.  Complicated because Oathkeeper and tank shields look identical in the logs, but behave differently.
+ * - Fix Watcher boss parsing.
+ * - Hopefully fix exceptions on alt-tab.
+ * No version bump - 5-22-2019
+ * - Improve shield tracking for mod 16.
+ * - Add deflect tracking.
+ * - Reduce UNKNOWNs for pets.
+ */
 
 /* Version History - dragonsbite
  * 1.2.6.0 - 2-11-2018
