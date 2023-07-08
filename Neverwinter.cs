@@ -2103,6 +2103,12 @@ namespace NWParsing_Plugin
             // Fix up the ParsedLine to be easy to process.
             ProcessBasic(pl);
 
+            // TODO ally detect v1.0
+            // mark all players as allies unless they have engaged in a hostile action against a player or companion
+            // mark companion with same ally status as their owners
+            // mark all NPCs as non-allies unless they are healing a player
+            // in a later version, try to filter out players that are aiding enemies as non-allies (they might be considered ally if not directly hostile towards other player)
+
             // Detect Player names..
             if (!(playersCharacterFound || isImport))
             {
@@ -2234,7 +2240,7 @@ namespace NWParsing_Plugin
                 {
                     line.tgtEntityType = EntityType.Pet;
                 }
-                else if (line.tgtInt.Contains(" Entity_"))
+                else if (line.tgtInt.Contains(" Entity_") || line.tgtInt.Contains(" Artifact_Weapon_Illusion_Clone"))
                 {
                     line.tgtEntityType = EntityType.Entity;
                 }
@@ -2270,6 +2276,11 @@ namespace NWParsing_Plugin
                 {
                     line.unitAttackerName = line.ownDsp;
                 }
+            }
+            else if (line.ownEntityType == EntityType.Player && line.srcInt.Contains("Artifact_Weapon_Illusion_Clone"))
+            {
+                // if not merging mirage weapons with player
+                // line.unitAttackerName = "Mirage Weapon" + " [" + line.ownDsp + "'s Entity]";
             }
             else if (line.ownEntityType == EntityType.Creature)
             {
@@ -3106,6 +3117,12 @@ namespace NWParsing_Plugin
                 string tempAttack = theAttackType;
                 if (line.flank && this.checkBox_flankSkill.Checked) tempAttack = theAttackType + ": Flank";
 
+                if (line.srcInt.Contains("Artifact_Weapon_Illusion_Clone"))
+                {
+                    // if merging with player
+                    line.unitAttackerName = line.srcDsp;
+                    tempAttack = theAttackType + " (Mirage Weapon)";
+                }
                 AddCombatActionNW(
                     swingType, line.critical, line.flank, line.dodge, special, line.unitAttackerName,
                     tempAttack, Damage, realDamage, baseDamage, line.logInfo.detectedTime,
