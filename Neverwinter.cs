@@ -12,16 +12,13 @@ using System.Text.RegularExpressions;
 using System.Globalization;
 using System.Net;
 
-
 [assembly: AssemblyTitle("Neverwinter Parsing Plugin")]
 [assembly: AssemblyDescription("A basic parser that reads the combat logs in Neverwinter.")]
 [assembly: AssemblyCopyright("oracleNW, jicama, dragonsbite, designedbyrng, nils.brummond@gmail.com based on: Antday <Unique> based on STO Plugin from Hilbert@mancom, Pirye@ucalegon")]
 [assembly: AssemblyVersion("1.2.8.0")]
 
-/*
- * Version History - oracleNW
+/* Version History - oracleNW
  * 1.2.8.0 2023-07-06
- * 
  */
 
 /* Version History - jicama (@valyana in NW)
@@ -128,180 +125,163 @@ namespace NWParsing_Plugin
             base.Dispose(disposing);
         }
 
+
         #region Windows Form Designer generated code
 
+        /// <summary>
+        ///  Required method for Designer support - do not modify
+        ///  the contents of this method with the code editor.
+        /// </summary>
         private void InitializeComponent()
         {
-            this.label1 = new System.Windows.Forms.Label();
-            this.checkBox_mergeNPC = new System.Windows.Forms.CheckBox();
-            this.checkBox_mergePets = new System.Windows.Forms.CheckBox();
-            this.checkBox_flankSkill = new System.Windows.Forms.CheckBox();
+            this.components = new System.ComponentModel.Container();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.label2 = new System.Windows.Forms.Label();
-            this.button_clearAll = new System.Windows.Forms.Button();
-            this.button_remove = new System.Windows.Forms.Button();
-            this.button_add = new System.Windows.Forms.Button();
-            this.textBox_player = new System.Windows.Forms.TextBox();
-            this.listBox_players = new System.Windows.Forms.ListBox();
+            this.checkMergePet = new System.Windows.Forms.CheckBox();
+            this.checkMergeSameName = new System.Windows.Forms.CheckBox();
+            this.checkSplitBloodletter = new System.Windows.Forms.CheckBox();
             this.groupBox2 = new System.Windows.Forms.GroupBox();
+            this.groupBox3 = new System.Windows.Forms.GroupBox();
+            this.radioMirageSeparateEntities = new System.Windows.Forms.RadioButton();
+            this.radioMirageAsPlayerAbility = new System.Windows.Forms.RadioButton();
+            this.checkConsumablesAreHealing = new System.Windows.Forms.CheckBox();
+            this.toolTip1 = new System.Windows.Forms.ToolTip(this.components);
             this.groupBox1.SuspendLayout();
             this.groupBox2.SuspendLayout();
+            this.groupBox3.SuspendLayout();
             this.SuspendLayout();
-            // 
-            // label1
-            // 
-            this.label1.AutoSize = true;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 10.25F, ((System.Drawing.FontStyle)((System.Drawing.FontStyle.Bold | System.Drawing.FontStyle.Underline))), System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.label1.Location = new System.Drawing.Point(12, 9);
-            this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(256, 17);
-            this.label1.TabIndex = 0;
-            this.label1.Text = "Neverwinter parser plugin Options";
-            // 
-            // checkBox_mergeNPC
-            // 
-            this.checkBox_mergeNPC.AutoSize = true;
-            this.checkBox_mergeNPC.Location = new System.Drawing.Point(6, 21);
-            this.checkBox_mergeNPC.Name = "checkBox_mergeNPC";
-            this.checkBox_mergeNPC.Size = new System.Drawing.Size(291, 17);
-            this.checkBox_mergeNPC.TabIndex = 2;
-            this.checkBox_mergeNPC.Text = "Merge all NPC combatants by removing NPC unique IDs";
-            this.checkBox_mergeNPC.UseVisualStyleBackColor = true;
-            this.checkBox_mergeNPC.MouseEnter += new System.EventHandler(this.checkBox_mergeNPC_MouseEnter);
-            this.checkBox_mergeNPC.MouseLeave += new System.EventHandler(this.control_MouseLeave);
-            // 
-            // checkBox_mergePets
-            // 
-            this.checkBox_mergePets.AutoSize = true;
-            this.checkBox_mergePets.Location = new System.Drawing.Point(6, 44);
-            this.checkBox_mergePets.Name = "checkBox_mergePets";
-            this.checkBox_mergePets.Size = new System.Drawing.Size(284, 17);
-            this.checkBox_mergePets.TabIndex = 3;
-            this.checkBox_mergePets.Text = "Merge all pet data to owner and remove pet from listing";
-            this.checkBox_mergePets.UseVisualStyleBackColor = true;
-            this.checkBox_mergePets.MouseEnter += new System.EventHandler(this.checkBox_mergePets_MouseEnter);
-            this.checkBox_mergePets.MouseLeave += new System.EventHandler(this.control_MouseLeave);
-            // 
-            // checkBox_flankSkill
-            // 
-            this.checkBox_flankSkill.AutoSize = true;
-            this.checkBox_flankSkill.Location = new System.Drawing.Point(6, 67);
-            this.checkBox_flankSkill.Name = "checkBox_flankSkill";
-            this.checkBox_flankSkill.Size = new System.Drawing.Size(213, 17);
-            this.checkBox_flankSkill.TabIndex = 4;
-            this.checkBox_flankSkill.Text = "Split skills in to flank and non-flank skills";
-            this.checkBox_flankSkill.UseVisualStyleBackColor = true;
-            this.checkBox_flankSkill.MouseEnter += new System.EventHandler(this.checkBox_flankSkill_MouseEnter);
-            this.checkBox_flankSkill.MouseLeave += new System.EventHandler(this.control_MouseLeave);
             // 
             // groupBox1
             // 
-            this.groupBox1.Controls.Add(this.label2);
-            this.groupBox1.Controls.Add(this.button_clearAll);
-            this.groupBox1.Controls.Add(this.button_remove);
-            this.groupBox1.Controls.Add(this.button_add);
-            this.groupBox1.Controls.Add(this.textBox_player);
-            this.groupBox1.Controls.Add(this.listBox_players);
-            this.groupBox1.Location = new System.Drawing.Point(15, 147);
+            this.groupBox1.Controls.Add(this.checkMergePet);
+            this.groupBox1.Controls.Add(this.checkMergeSameName);
+            this.groupBox1.Location = new System.Drawing.Point(12, 12);
             this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(362, 188);
-            this.groupBox1.TabIndex = 5;
+            this.groupBox1.Size = new System.Drawing.Size(430, 70);
+            this.groupBox1.TabIndex = 0;
             this.groupBox1.TabStop = false;
-            this.groupBox1.Text = "Player Detection";
-            this.groupBox1.MouseEnter += new System.EventHandler(this.playerNameControls_MouseEnter);
-            this.groupBox1.MouseLeave += new System.EventHandler(this.control_MouseLeave);
+            this.groupBox1.Text = "Combatant Merging";
             // 
-            // label2
+            // checkMergePet
             // 
-            this.label2.AutoSize = true;
-            this.label2.Location = new System.Drawing.Point(184, 19);
-            this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(109, 13);
-            this.label2.TabIndex = 6;
-            this.label2.Text = "Add / Remove Player";
-            this.label2.MouseEnter += new System.EventHandler(this.playerNameControls_MouseEnter);
-            this.label2.MouseLeave += new System.EventHandler(this.control_MouseLeave);
+            this.checkMergePet.AutoSize = true;
+            this.checkMergePet.Location = new System.Drawing.Point(19, 47);
+            this.checkMergePet.Name = "checkMergePet";
+            this.checkMergePet.Size = new System.Drawing.Size(156, 19);
+            this.checkMergePet.TabIndex = 1;
+            this.checkMergePet.Text = "Merge pet data to owner";
+            this.toolTip1.SetToolTip(this.checkMergePet, "Reports a pet\'s damage as if it was done by its owner (pets will not be displayed" +
+        " separately)");
+            this.checkMergePet.UseVisualStyleBackColor = true;
+            // this.checkMergePet.CheckedChanged += new System.EventHandler(this.checkBox2_CheckedChanged);
             // 
-            // button_clearAll
+            // checkMergeSameName
             // 
-            this.button_clearAll.Location = new System.Drawing.Point(296, 64);
-            this.button_clearAll.Name = "button_clearAll";
-            this.button_clearAll.Size = new System.Drawing.Size(60, 23);
-            this.button_clearAll.TabIndex = 9;
-            this.button_clearAll.Text = "Clear All";
-            this.button_clearAll.UseVisualStyleBackColor = true;
-            this.button_clearAll.Click += new System.EventHandler(this.button_clearAll_Click);
-            this.button_clearAll.MouseEnter += new System.EventHandler(this.playerNameControls_MouseEnter);
-            this.button_clearAll.MouseLeave += new System.EventHandler(this.control_MouseLeave);
+            this.checkMergeSameName.AutoSize = true;
+            this.checkMergeSameName.Checked = true;
+            this.checkMergeSameName.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkMergeSameName.Location = new System.Drawing.Point(19, 22);
+            this.checkMergeSameName.Name = "checkMergeSameName";
+            this.checkMergeSameName.Size = new System.Drawing.Size(263, 19);
+            this.checkMergeSameName.TabIndex = 0;
+            this.checkMergeSameName.Tag = "";
+            this.checkMergeSameName.Text = "Merge NPC combatants with the same name";
+            this.toolTip1.SetToolTip(this.checkMergeSameName, "Lists all combatants that have the same name as if they were one enemy");
+            this.checkMergeSameName.UseVisualStyleBackColor = true;
             // 
-            // button_remove
+            // checkSplitBloodletter
             // 
-            this.button_remove.Location = new System.Drawing.Point(225, 64);
-            this.button_remove.Name = "button_remove";
-            this.button_remove.Size = new System.Drawing.Size(65, 23);
-            this.button_remove.TabIndex = 8;
-            this.button_remove.Text = "Remove";
-            this.button_remove.UseVisualStyleBackColor = true;
-            this.button_remove.Click += new System.EventHandler(this.button_remove_Click);
-            this.button_remove.MouseEnter += new System.EventHandler(this.playerNameControls_MouseEnter);
-            this.button_remove.MouseLeave += new System.EventHandler(this.control_MouseLeave);
-            // 
-            // button_add
-            // 
-            this.button_add.Location = new System.Drawing.Point(185, 64);
-            this.button_add.Name = "button_add";
-            this.button_add.Size = new System.Drawing.Size(34, 23);
-            this.button_add.TabIndex = 7;
-            this.button_add.Text = "Add";
-            this.button_add.UseVisualStyleBackColor = true;
-            this.button_add.Click += new System.EventHandler(this.button_add_Click);
-            this.button_add.MouseEnter += new System.EventHandler(this.playerNameControls_MouseEnter);
-            this.button_add.MouseLeave += new System.EventHandler(this.control_MouseLeave);
-            // 
-            // textBox_player
-            // 
-            this.textBox_player.Location = new System.Drawing.Point(185, 38);
-            this.textBox_player.Name = "textBox_player";
-            this.textBox_player.Size = new System.Drawing.Size(171, 20);
-            this.textBox_player.TabIndex = 6;
-            this.textBox_player.TextChanged += new System.EventHandler(this.textBox_player_TextChanged);
-            this.textBox_player.MouseEnter += new System.EventHandler(this.playerNameControls_MouseEnter);
-            this.textBox_player.MouseLeave += new System.EventHandler(this.control_MouseLeave);
-            // 
-            // listBox_players
-            // 
-            this.listBox_players.FormattingEnabled = true;
-            this.listBox_players.Location = new System.Drawing.Point(6, 19);
-            this.listBox_players.Name = "listBox_players";
-            this.listBox_players.Size = new System.Drawing.Size(172, 160);
-            this.listBox_players.TabIndex = 5;
-            this.listBox_players.SelectedIndexChanged += new System.EventHandler(this.listBox_players_SelectedIndexChanged);
-            this.listBox_players.MouseEnter += new System.EventHandler(this.playerNameControls_MouseEnter);
-            this.listBox_players.MouseLeave += new System.EventHandler(this.control_MouseLeave);
+            this.checkSplitBloodletter.AutoSize = true;
+            this.checkSplitBloodletter.Location = new System.Drawing.Point(19, 22);
+            this.checkSplitBloodletter.Name = "checkSplitBloodletter";
+            this.checkSplitBloodletter.Size = new System.Drawing.Size(230, 19);
+            this.checkSplitBloodletter.TabIndex = 2;
+            this.checkSplitBloodletter.Text = "List Bloodletter self-damage separately";
+            this.toolTip1.SetToolTip(this.checkSplitBloodletter, "Bloodletter deals damage twice when you use it - once to your enemy, and once to " +
+        "yourself.\r\nIf checked, these two damage events will be listed as different abili" +
+        "ties instead of grouped as one.");
+            this.checkSplitBloodletter.UseVisualStyleBackColor = true;
+            // this.checkSplitBloodletter.CheckedChanged += new System.EventHandler(this.checkBox3_CheckedChanged);
             // 
             // groupBox2
             // 
-            this.groupBox2.Controls.Add(this.checkBox_mergeNPC);
-            this.groupBox2.Controls.Add(this.checkBox_mergePets);
-            this.groupBox2.Controls.Add(this.checkBox_flankSkill);
-            this.groupBox2.Location = new System.Drawing.Point(15, 41);
+            this.groupBox2.Controls.Add(this.groupBox3);
+            this.groupBox2.Controls.Add(this.checkConsumablesAreHealing);
+            this.groupBox2.Controls.Add(this.checkSplitBloodletter);
+            this.groupBox2.Location = new System.Drawing.Point(12, 88);
             this.groupBox2.Name = "groupBox2";
-            this.groupBox2.Size = new System.Drawing.Size(362, 100);
-            this.groupBox2.TabIndex = 6;
+            this.groupBox2.Size = new System.Drawing.Size(442, 160);
+            this.groupBox2.TabIndex = 2;
             this.groupBox2.TabStop = false;
-            this.groupBox2.Text = "Options";
+            this.groupBox2.Text = "Advanced Options";
             // 
-            // NW_Parser
+            // groupBox3
             // 
+            this.groupBox3.Controls.Add(this.radioMirageSeparateEntities);
+            this.groupBox3.Controls.Add(this.radioMirageAsPlayerAbility);
+            this.groupBox3.Location = new System.Drawing.Point(6, 72);
+            this.groupBox3.Name = "groupBox3";
+            this.groupBox3.Size = new System.Drawing.Size(430, 83);
+            this.groupBox3.TabIndex = 8;
+            this.groupBox3.TabStop = false;
+            this.groupBox3.Text = "Mirage Weapons";
+            // 
+            // radioMirageSeparateEntities
+            // 
+            this.radioMirageSeparateEntities.AutoSize = true;
+            this.radioMirageSeparateEntities.Location = new System.Drawing.Point(13, 47);
+            this.radioMirageSeparateEntities.Name = "radioMirageSeparateEntities";
+            this.radioMirageSeparateEntities.Size = new System.Drawing.Size(317, 29);
+            this.radioMirageSeparateEntities.TabIndex = 2;
+            this.radioMirageSeparateEntities.Text = "List Mirage weapon clones separately from the player (check the \"merge NPC\"\r\noption if using this)";
+            this.toolTip1.SetToolTip(this.radioMirageSeparateEntities, "All combat information regarding Mirage weapon clones will be listed.\r\nThe clones" +
+        " will be reported as their own entity, with a name that indicates their owner.");
+            this.radioMirageSeparateEntities.UseVisualStyleBackColor = true;
+            // 
+            // radioMirageAsPlayerAbility
+            // 
+            this.radioMirageAsPlayerAbility.AutoSize = true;
+            this.radioMirageAsPlayerAbility.Checked = true;
+            this.radioMirageAsPlayerAbility.Location = new System.Drawing.Point(13, 22);
+            this.radioMirageAsPlayerAbility.Name = "radioMirageAsPlayerAbility";
+            this.radioMirageAsPlayerAbility.Size = new System.Drawing.Size(436, 19);
+            this.radioMirageAsPlayerAbility.TabIndex = 1;
+            this.radioMirageAsPlayerAbility.TabStop = true;
+            this.radioMirageAsPlayerAbility.Text = "List outgoing damage from clones as a special player ability (recommended)";
+            this.toolTip1.SetToolTip(this.radioMirageAsPlayerAbility, "Outgoing damage from Mirage weapons will be considered player damage.\r\nOther comb" +
+        "at events involving Mirage weapon clones (such as incoming damage) will be ignor" +
+        "ed.");
+            this.radioMirageAsPlayerAbility.UseVisualStyleBackColor = true;
+            // 
+            // checkConsumablesAreHealing
+            // 
+            this.checkConsumablesAreHealing.AutoSize = true;
+            this.checkConsumablesAreHealing.Checked = true;
+            this.checkConsumablesAreHealing.CheckState = System.Windows.Forms.CheckState.Checked;
+            this.checkConsumablesAreHealing.Location = new System.Drawing.Point(19, 47);
+            this.checkConsumablesAreHealing.Name = "checkConsumablesAreHealing";
+            this.checkConsumablesAreHealing.Size = new System.Drawing.Size(343, 19);
+            this.checkConsumablesAreHealing.TabIndex = 7;
+            this.checkConsumablesAreHealing.Text = "Consider resurrection and consumables as outgoing healing (unimplemented)";
+            this.toolTip1.SetToolTip(this.checkConsumablesAreHealing, "If you want to ignore healing that occurs due to items and revives, uncheck this " +
+        "box.");
+            this.checkConsumablesAreHealing.UseVisualStyleBackColor = true;
+            // 
+            // Form1
+            // 
+            //this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
+            //this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.Controls.Add(this.groupBox2);
             this.Controls.Add(this.groupBox1);
-            this.Controls.Add(this.label1);
             this.Name = "NW_Parser";
-            this.Size = new System.Drawing.Size(399, 380);
+            this.Size = new System.Drawing.Size(490, 247);
+            //this.Text = "Form1";
+            //this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
             this.groupBox2.ResumeLayout(false);
             this.groupBox2.PerformLayout();
+            this.groupBox3.ResumeLayout(false);
+            this.groupBox3.PerformLayout();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -309,18 +289,16 @@ namespace NWParsing_Plugin
 
         #endregion
 
-        private System.Windows.Forms.Label label1;
-        private System.Windows.Forms.CheckBox checkBox_mergeNPC;
-        private System.Windows.Forms.CheckBox checkBox_mergePets;
-        private System.Windows.Forms.CheckBox checkBox_flankSkill;
         private GroupBox groupBox1;
-        private TextBox textBox_player;
-        private ListBox listBox_players;
+        private CheckBox checkSplitBloodletter;
+        private CheckBox checkMergePet;
+        private CheckBox checkMergeSameName;
         private GroupBox groupBox2;
-        private Button button_clearAll;
-        private Button button_remove;
-        private Button button_add;
-        private Label label2;
+        private GroupBox groupBox3;
+        private RadioButton radioMirageSeparateEntities;
+        private RadioButton radioMirageAsPlayerAbility;
+        private CheckBox checkConsumablesAreHealing;
+        private ToolTip toolTip1;
 
         #endregion
 
@@ -347,9 +325,6 @@ namespace NWParsing_Plugin
 
         // For tracking source of Chaotic Growth heals.
         private Dictionary<string, ChaoticGrowthInfo> magicMissileLastHit = new Dictionary<string, ChaoticGrowthInfo>();
-
-        private Dictionary<string, bool> playerCharacterNames = new Dictionary<string, bool>();
-        private bool playersCharacterFound = false;
 
         // FIXME changing some of these Inc/Out___Name strings breaks columns in Combatant list in Encounter view for some reason
         private const string IncDamageName = "Damage (Inc)";
@@ -2054,7 +2029,6 @@ namespace NWParsing_Plugin
             entityOwnerRegistery.Clear();
             magicMissileLastHit.Clear();
             unmatchedShieldLines.Clear();
-            playersCharacterFound = false;
         }
 
         void oFormActMain_OnCombatEnd(bool isImport, CombatToggleEventArgs encounterInfo)
@@ -2070,7 +2044,6 @@ namespace NWParsing_Plugin
             unmatchedShieldLines.Clear();
 
             entityOwnerRegistery.Clear();
-            playersCharacterFound = false;
         }
 
         // Must match LogLineEventDelegate signature
@@ -2108,19 +2081,6 @@ namespace NWParsing_Plugin
             // mark companion with same ally status as their owners
             // mark all NPCs as non-allies unless they are healing a player
             // in a later version, try to filter out players that are aiding enemies as non-allies (they might be considered ally if not directly hostile towards other player)
-
-            // Detect Player names..
-            if (!(playersCharacterFound || isImport))
-            {
-                if (pl.ownEntityType == EntityType.Player)
-                {
-                    if (playerCharacterNames.ContainsKey(pl.ownDsp))
-                    {
-                        ActGlobals.charName = pl.ownDsp;
-                        playersCharacterFound = true;
-                    }
-                }
-            }
 
             // Do the real stuff..
             ProcessAction(pl);
@@ -2271,23 +2231,30 @@ namespace NWParsing_Plugin
                 line.encAttackerName = line.ownDsp;
 
                 // Pet name:
-                line.unitAttackerName = line.srcDsp + " [" + line.ownDsp + "'s Pet]";
-                if (this.checkBox_mergePets.Checked)
+                line.unitAttackerName = line.srcDsp + " (" + line.ownDsp + "'s Pet)";
+                if (this.checkMergePet.Checked)
                 {
                     line.unitAttackerName = line.ownDsp;
                 }
             }
             else if (line.ownEntityType == EntityType.Player && line.srcInt.Contains("Artifact_Weapon_Illusion_Clone"))
             {
-                // if not merging mirage weapons with player
-                // line.unitAttackerName = "Mirage Weapon" + " [" + line.ownDsp + "'s Entity]";
+                if (radioMirageSeparateEntities.Checked)
+                {
+                    // not merging mirage weapons with player
+                    string mirageName = "Mirage Weapon Clone";
+                    string creatureID = line.srcInt.Split()[0].Substring(2);
+                    mirageName += (checkMergeSameName.Checked) ? "" : " [" + creatureID + "]";
+                    mirageName += " (" + line.ownDsp + "'s Entity)";
+                    line.unitAttackerName = mirageName;
+                }
             }
             else if (line.ownEntityType == EntityType.Creature)
             {
                 line.encAttackerName = line.ownDsp;
                 String creatureId = line.ownInt.Split()[0].Substring(2);
 
-                if (checkBox_mergeNPC.Checked)
+                if (checkMergeSameName.Checked)
                 {
                     // Merge all NPCs to a single name.
                     line.unitAttackerName = line.ownDsp;
@@ -2322,8 +2289,8 @@ namespace NWParsing_Plugin
                             line.encAttackerName = owner.ownerDsp;
 
                             // Pet name:
-                            line.unitAttackerName = line.srcDsp + " [" + owner.ownerDsp + "'s Pet]";
-                            if (this.checkBox_mergePets.Checked)
+                            line.unitAttackerName = line.srcDsp + " (" + owner.ownerDsp + "'s Pet)";
+                            if (this.checkMergePet.Checked)
                             {
                                 line.unitAttackerName = owner.ownerDsp;
                             }
@@ -2346,7 +2313,7 @@ namespace NWParsing_Plugin
                             {
                                 line.encAttackerName = owner.ownerDsp;
 
-                                if (checkBox_mergeNPC.Checked)
+                                if (checkMergeSameName.Checked)
                                 {
                                     // Merge all NPCs to a single name.
                                     line.unitAttackerName = owner.ownerDsp;
@@ -2376,7 +2343,7 @@ namespace NWParsing_Plugin
                     {
                         line.encAttackerName = line.srcDsp;
 
-                        if (checkBox_mergeNPC.Checked)
+                        if (checkMergeSameName.Checked)
                         {
                             // Merge all NPCs to a single name.
                             line.unitAttackerName = line.srcDsp;
@@ -2424,8 +2391,8 @@ namespace NWParsing_Plugin
                             line.encTargetName = line.tgtOwnerInfo.ownerDsp;
 
                             // Pet name:
-                            line.unitTargetName = line.tgtDsp + " [" + line.tgtOwnerInfo.ownerDsp + "'s Pet]";
-                            if (this.checkBox_mergePets.Checked)
+                            line.unitTargetName = line.tgtDsp + " (" + line.tgtOwnerInfo.ownerDsp + "'s Pet)";
+                            if (this.checkMergePet.Checked)
                             {
                                 line.unitTargetName = line.tgtOwnerInfo.ownerDsp;
                             }
@@ -2442,6 +2409,18 @@ namespace NWParsing_Plugin
                 case EntityType.Entity:
                     {
                         line.tgtOwnerInfo = entityOwnerRegistery.Resolve(line.tgtInt);
+                        // not merging mirage weapons with player
+                        if (radioMirageSeparateEntities.Checked && line.tgtInt.Contains("Artifact_Weapon_Illusion_Clone"))
+                        {
+                            string entityID = line.tgtInt.Split()[0].Substring(2);
+                            //string mirageOwner = (line.tgtOwnerInfo == null) ? line.tgtOwnerInfo.ownerDsp : line.tgtDsp;
+                            string mirageOwner = line.tgtDsp;
+                            string mirageName = "Mirage Weapon Clone";
+                            mirageName += (checkMergeSameName.Checked) ? "" : " [" + entityID + "]";
+                            mirageName += " (" + mirageOwner + "'s Entity)";
+                            line.encTargetName = mirageOwner;
+                            line.unitTargetName = mirageName;
+                        }
                         if (line.tgtOwnerInfo != null)
                         {
                             // What does this mean???
@@ -2464,7 +2443,7 @@ namespace NWParsing_Plugin
                             line.encTargetName = line.tgtDsp;
                             String creatureId = line.tgtInt.Split()[0].Substring(2);
 
-                            if (checkBox_mergeNPC.Checked)
+                            if (checkMergeSameName.Checked)
                             {
                                 // Merge all NPCs to a single name.
                                 line.unitTargetName = line.tgtDsp;
@@ -2945,7 +2924,9 @@ namespace NWParsing_Plugin
                 // Attack goes OWN -> TRG, and SRC is just informational
                 // 23:07:07:17:11:40.0::Stof,P[509567510@19259169 Stof@stof#0000],Tutor,C[39688 Pet_Tutor],Stof,P[509567510@19259169 Stof@stof#0000],Bloodletter,Pn.Q3o7t91,Physical,,22160.4,29897
                 ProcessNamesTargetOnly(l); // don't use OwnerSource or OST, only one entity is really relevant with this action (the hostile inter-target damage hit is recorded separately)
-                AddCombatActionNW((int)SwingTypeEnum.Melee, l.critical, l.flank, l.dodge, l.special, l.unitTargetName, l.attackType, new Dnum(magAdj), l.mag, l.magBase, l.logInfo.detectedTime, l.ts, l.unitTargetName, l.type);
+
+                string bloodletterSelf = l.attackType + (checkSplitBloodletter.Checked ? " (self-damage)" : "");
+                AddCombatActionNW((int)SwingTypeEnum.Melee, l.critical, l.flank, l.dodge, l.special, l.unitTargetName, bloodletterSelf, new Dnum(magAdj), l.mag, l.magBase, l.logInfo.detectedTime, l.ts, l.unitTargetName, l.type);
             }
             else
             {
@@ -3113,15 +3094,15 @@ namespace NWParsing_Plugin
             // Use encounter names attacker and target here.  This allows filtering
             if (ActGlobals.oFormActMain.SetEncounter(line.logInfo.detectedTime, line.encAttackerName, line.encTargetName))
             {
-                // add Flank to AttackType if setting is set
                 string tempAttack = theAttackType;
-                if (line.flank && this.checkBox_flankSkill.Checked) tempAttack = theAttackType + ": Flank";
-
                 if (line.srcInt.Contains("Artifact_Weapon_Illusion_Clone"))
                 {
-                    // if merging with player
-                    line.unitAttackerName = line.srcDsp;
-                    tempAttack = theAttackType + " (Mirage Weapon)";
+                    if (radioMirageAsPlayerAbility.Checked)
+                    {
+                        // merging with player
+                        line.unitAttackerName = line.srcDsp;
+                        tempAttack = theAttackType + " (Mirage Weapon)";
+                    }
                 }
                 AddCombatActionNW(
                     swingType, line.critical, line.flank, line.dodge, special, line.unitAttackerName,
@@ -3194,10 +3175,12 @@ namespace NWParsing_Plugin
         void LoadSettings()
         {
 
-            xmlSettings.AddControlSetting(checkBox_mergeNPC.Name, checkBox_mergeNPC);
-            xmlSettings.AddControlSetting(checkBox_mergePets.Name, checkBox_mergePets);
-            xmlSettings.AddControlSetting(checkBox_flankSkill.Name, checkBox_flankSkill);
-            xmlSettings.AddControlSetting(listBox_players.Name, listBox_players);
+            xmlSettings.AddControlSetting(checkMergeSameName.Name, checkMergeSameName);
+            xmlSettings.AddControlSetting(checkMergePet.Name, checkMergePet);
+            xmlSettings.AddControlSetting(checkSplitBloodletter.Name, checkSplitBloodletter);
+            xmlSettings.AddControlSetting(checkConsumablesAreHealing.Name, checkConsumablesAreHealing);
+            xmlSettings.AddControlSetting(radioMirageSeparateEntities.Name, radioMirageSeparateEntities);
+            xmlSettings.AddControlSetting(radioMirageAsPlayerAbility.Name, radioMirageAsPlayerAbility);
 
             if (File.Exists(settingsFile))
             {
@@ -3223,11 +3206,6 @@ namespace NWParsing_Plugin
                 }
                 xReader.Close();
             }
-
-            foreach (string i in listBox_players.Items)
-            {
-                playerCharacterNames.Add(i.ToString(), true);
-            }
         }
 
         void SaveSettings()
@@ -3248,81 +3226,16 @@ namespace NWParsing_Plugin
             xWriter.Close();
         }
 
-        private void button_add_Click(object sender, EventArgs e)
-        {
-            string name = textBox_player.Text;
-            if (!listBox_players.Items.Contains(name))
-            {
-                listBox_players.Items.Add(name);
-                playerCharacterNames.Add(name, true);
-                textBox_player.Clear();
-            }
-        }
-
-        private void button_remove_Click(object sender, EventArgs e)
-        {
-            string name = textBox_player.Text;
-            if (listBox_players.Items.Contains(name))
-            {
-                listBox_players.Items.Remove(name);
-                playerCharacterNames.Remove(name);
-                textBox_player.Clear();
-            }
-        }
-
-        private void button_clearAll_Click(object sender, EventArgs e)
-        {
-            listBox_players.Items.Clear();
-            playerCharacterNames.Clear();
-            textBox_player.Clear();
-        }
-
-        private void listBox_players_SelectedIndexChanged(object sender, EventArgs e)
-        {
-            if (listBox_players.SelectedIndex != -1)
-            {
-                textBox_player.Text = listBox_players.SelectedItem.ToString();
-            }
-        }
-
-        private void control_MouseLeave(object sender, EventArgs e)
-        {
-            ActGlobals.oFormActMain.SetOptionsHelpText(String.Empty);
-        }
-
-        private void textBox_player_TextChanged(object sender, EventArgs e)
-        {
-            bool not_empty = (this.textBox_player.Text.Length > 0);
-            this.button_remove.Enabled = this.button_add.Enabled = not_empty;
-
-            if (!not_empty)
-            {
-                listBox_players.SelectedIndex = -1;
-            }
-        }
-
-        private void playerNameControls_MouseEnter(object sender, EventArgs e)
-        {
-            ActGlobals.oFormActMain.SetOptionsHelpText("Add the names of your player characters.  This allows ACT to detect which player character is yours.  Spelling and capitalization must be exact.");
-        }
-
-        private void checkBox_mergeNPC_MouseEnter(object sender, EventArgs e)
-        {
-            ActGlobals.oFormActMain.SetOptionsHelpText("Select this option to merge NPC combatants by name.  This removes the instance number from the combatant name.  For example Orc [1], Orc [2], ... Orc [n] are all merged in Orc");
-        }
-
-        private void checkBox_mergePets_MouseEnter(object sender, EventArgs e)
-        {
-            ActGlobals.oFormActMain.SetOptionsHelpText("Merge a player's pet with the player and remove the pet as a combatant.");
-        }
-
-        private void checkBox_flankSkill_MouseEnter(object sender, EventArgs e)
-        {
-            ActGlobals.oFormActMain.SetOptionsHelpText("Separate flank hits in to separate abilities named \"<ability-name> : Flank\"");
-        }
     }
-
     // TODO improve ownership code to handle mirage weapon clones, enemy spawners, and entity-spawning companions (tutor) properly
+    // Shadar-kai witch spawns entities for attacks, can be multiple of these entities per actual companion entity
+    // Tutor spawns Instructional Aid entity
+    // in general, companions summoning entities needs to be handled correctly
+    // 23:07:09:11:45:23.9::Luandi'iL,P[516119579@31848018 Luandi'iL@bluetree#5171],Ecuandara,C[35688 Pet_Shadar-kai_Witch],The Forge Master,C[36141 M25_He_Duergar_Forgemaster_Mini],Visage of the Shadowfell,Pn.Sgat5j,Physical,Critical|Flank,48757.3,69348.9
+    // 23:07:09:11:48:36.5::Ecuandara,C[35688 Pet_Shadar-kai_Witch],Grasp of Shadows,C[37160 Pet_Shadar-kai_Witch_Entcreate],Lolth Touched Spider,C[37048 M25_He_Spider_Mini],Grasp of Shadows,Pn.Eslpvn,KnockUp,Immune,0,0
+    // 23:07:09:11:00:40.9::Shirin of the Stars, P[516441999@30378071 Shirin of the Stars@lordmelchett#1830],Instuctional Aid,C[708 Pet_Tutor_Aid],Euphorbos,C[688 Trial_Beholder_Minotaur],Instructional Aid,Pn.Bdzbls,Physical,Flank,35502.8,23671.6
+    // 23:07:09:11:00:39.7::Shirin of the Stars, P[516441999@30378071 Shirin of the Stars@lordmelchett#1830],Instuctional Aid,C[708 Pet_Tutor_Aid],Euphorbos,C[688 Trial_Beholder_Minotaur],Instructional Aid,Pn.3kzn9w1,Physical,Flank,114204,72300.7
+
     internal class OwnerInfo
     {
         public string ownerDsp;
